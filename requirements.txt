@@ -1,0 +1,6 @@
+yt-dlp
+requests
+PySide6
+pywin32; sys_platform == 'win32'
+
+
