@@ -49,26 +49,20 @@ jobs:
 
     - name: Download dan Ekstrak aria2c Binaries
       run: |
-        # URL untuk aria2c static build (dari GitHub q3aql/aria2-static-builds)
         $aria2cUrl = "https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-win-64bit-build2.7z"
         $aria2cZip = "aria2c-win-64bit.7z"
         $aria2cDir = "aria2c_bins"
-
-        # 7-Zip sudah terinstal dari step sebelumnya
 
         Invoke-WebRequest -Uri $aria2cUrl -OutFile $aria2cZip
 
         mkdir $aria2cDir
 
-        # Ekstrak aria2c
         7z x $aria2cZip -o"$aria2cDir" -aoa
-        # Pindahkan aria2c.exe ke root folder biner aria2c
         Move-Item -Path "$aria2cDir\aria2-1.36.0-win-64bit-build2\aria2c.exe" -Destination "$aria2cDir\aria2c.exe"
 
 
     - name: Compile aplikasi dengan Nuitka
       run: |
-        # Command Nuitka lo, ditambahi --include-extra-binaries untuk FFmpeg dan aria2c
         python -m nuitka --standalone --windows-disable-console --enable-plugin=pyside6 `
           --include-qt-plugins=multimedia,platforms `
           --nofollow-import-to=yt_dlp.extractor.lazy_extractors `
@@ -76,7 +70,7 @@ jobs:
           --windows-icon-from-ico=youtube_downloader_icon.ico --remove-output main.py `
           --include-extra-binaries=ffmpeg_bins\ffmpeg.exe=ffmpeg.exe `
           --include-extra-binaries=ffmpeg_bins\ffprobe.exe=ffprobe.exe `
-          --include-extra-binaries=aria2c_bins\aria2c.exe=aria2c.exe # Penambahan aria2c.exe
+          --include-extra-binaries=aria2c_bins\aria2c.exe=aria2c.exe
 
     - name: Install Inno Setup
       run: |
@@ -104,21 +98,47 @@ jobs:
     - name: Baca Changelog dari file
       id: get_changelog
       run: |
-        CHANGELOG_BODY=$(python -c "
+        # Definisi script Python dalam variabel multi-line PowerShell dengan '@''...'@'
+        # Ini adalah cara yang lebih aman untuk embedding script di YAML
+        $pythonScriptContent = @'
 import re
 import os
-tag = os.environ['GITHUB_REF_NAME']
-with open('CHANGELOG.md', 'r', encoding='utf-8') as f:
-    content = f.read()
-match = re.search(r'## ' + re.escape(tag) + r'\s*\n(.*?)(?=\n## v\d|\Z)', content, re.DOTALL | re.IGNORECASE)
-if match:
-    print(match.group(1).strip())
-else:
-    print(f'Tidak ada catatan perubahan untuk {tag}.')
-        ")
-        echo "CHANGELOG_BODY<<EOF" >> $GITHUB_OUTPUT
-        echo "$CHANGELOG_BODY" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
+import sys
+
+tag = os.environ.get('GITHUB_REF_NAME', '')
+changelog_file = 'CHANGELOG.md'
+
+if not os.path.exists(changelog_file):
+    print(f"Error: {changelog_file} tidak ditemukan.", file=sys.stderr)
+    sys.exit(1)
+
+try:
+    with open(changelog_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+    
+    # Regex untuk mencari entri changelog yang sesuai dengan tag
+    # Perhatikan escaping backslash ganda di regex untuk Python string literal
+    regex_pattern = r'##\\s*' + re.escape(tag) + r'\\s*\\n(.*?)(?=\\n## v\\d|\\Z)'
+    match = re.search(regex_pattern, content, re.DOTALL | re.IGNORECASE)
+    
+    if match:
+        print(match.group(1).strip())
+    else:
+        print(f'Tidak ada catatan perubahan untuk {tag}.')
+except Exception as e:
+    print(f"Error saat membaca changelog: {e}", file=sys.stderr)
+    sys.exit(1)
+'@
+        # Menulis script Python ke file sementara
+        Set-Content -Path "read_changelog.py" -Value $pythonScriptContent -Encoding utf8
+
+        # Eksekusi script Python dan tangkap outputnya
+        $changelogBody = python read_changelog.py
+        
+        # Set output variable untuk multi-line
+        echo "CHANGELOG_BODY<<EOF_CHANGELOG" >> "$GITHUB_OUTPUT"
+        echo "$changelogBody" >> "$GITHUB_OUTPUT"
+        echo "EOF_CHANGELOG" >> "$GITHUB_OUTPUT"
 
     - name: Buat Rilis di GitHub & Upload Aset
       id: create_release
