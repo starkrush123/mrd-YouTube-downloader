@@ -11,7 +11,7 @@ class SearchResultsDialog(QDialog):
     download_all_playlist_items_requested = Signal(list, str, str)
     def __init__(self, results, parent=None, result_type="video_search", list_title_str=None, original_list_url=None, settings=None):
         super().__init__(parent)
-        self.setModal(True)
+        self.setModal(False)
         self.result_type = result_type
         self.original_list_url = original_list_url
         self.list_title_str = list_title_str

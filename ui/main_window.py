@@ -60,7 +60,7 @@ class MainWindow(MainWindowCore):
         self.validation = MainWindowValidation(self)
         self.app_settings = MainWindowSettings(self)
         self.last_focused_widget = None
-        self.player_launched_from_search_dialog = False
+        
 
         self.stacked_widget = QStackedWidget()
         self.setCentralWidget(self.stacked_widget)
