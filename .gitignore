@@ -133,3 +133,4 @@ cython_debug/
 
 # Custom ignores
 errors.txt
+ChangeLog.md

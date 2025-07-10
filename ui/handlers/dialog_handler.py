@@ -27,16 +27,14 @@ class DialogHandler:
         dialog.exec()
         self.main_window.update_window_title_status("Siap")
 
-    def handle_settings_changed(self):
-        new_settings = self.sender().get_settings()
-
+    def handle_settings_changed(self, new_settings):
         if self.main_window.settings.get('theme') != new_settings.get('theme'):
             self.main_window.settings = new_settings
-            self.main_window.apply_theme()
+            self.main_window.app_settings.apply_theme()
         else:
             self.main_window.settings = new_settings
         self.main_window.save_app_settings()
-        self.main_window.init_clipboard_monitor()
+        self.main_window.events.init_clipboard_monitor()
         self.main_window.set_status_text("Pengaturan disimpan dan diterapkan.")
         if self.main_window.video_player_widget:
             self.main_window.video_player_widget.settings = self.main_window.settings

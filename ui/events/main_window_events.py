@@ -19,7 +19,7 @@ class MainWindowEvents:
         self.main_window.main_view_widget.input_line_edit.setPlaceholderText(f"Masukkan URL atau kata kunci {text.lower()}")
 
     def keyPressEvent(self, event: QKeyEvent):
-        if self.main_window.stacked_widget.currentWidget() != self.main_window.main_view_widget:
+        if self.main_window.tab_widget.currentWidget() != self.main_window.main_view_widget:
             super(self.main_window.__class__, self.main_window).keyPressEvent(event)
             return
         current_focus = QApplication.focusWidget()
@@ -157,6 +157,18 @@ class MainWindowEvents:
             url_to_focus = self.main_window.last_downloaded_item_info.get('url') if self.main_window.last_downloaded_item_info else None
             self.main_window.download_initiated_from_search_dialog = False
         self.restore_proper_focus(item_url_to_focus=url_to_focus)
+
+    def restore_proper_focus(self, item_url_to_focus=None):
+        if self.main_window.search_handler.active_search_results_dialog:
+            self.main_window.search_handler.active_search_results_dialog.show()
+            self.main_window.search_handler.active_search_results_dialog.activateWindow()
+            self.main_window.search_handler.active_search_results_dialog.raise_()
+            if item_url_to_focus:
+                self.main_window.search_handler.active_search_results_dialog.restore_focus_and_selection(item_url_to_focus)
+            else:
+                self.main_window.search_handler.active_search_results_dialog.setFocus()
+        else:
+            QTimer.singleShot(250, self.main_window.main_view_widget.input_line_edit.setFocus)
 
     def closeEvent(self, event):
         if self.main_window._is_closing_app:

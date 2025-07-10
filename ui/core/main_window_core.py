@@ -3,6 +3,7 @@ import json
 import sys
 import subprocess
 import webbrowser
+import shutil
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QProgressDialog
 from PySide6.QtCore import Qt, QUrl, QTimer, QStandardPaths
 from PySide6.QtGui import QDesktopServices
@@ -200,7 +201,7 @@ class MainWindowCore(QMainWindow):
         effective_busy_state = busy or is_any_thread_running or is_dialog_blocking or self.current_list_batch_download_active
         if operation_type == "playback" or operation_type == "playback_loading":
             effective_busy_state = busy or is_any_thread_running or is_dialog_blocking or self.current_list_batch_download_active
-        is_main_view_active = self.stacked_widget.currentWidget() == self.main_view_widget
+        is_main_view_active = self.tab_widget.currentWidget() == self.main_view_widget
         enable_main_controls = not effective_busy_state and is_main_view_active
         self.main_view_widget.input_line_edit.setEnabled(enable_main_controls)
         self.main_view_widget.search_type_combo.setEnabled(enable_main_controls)
