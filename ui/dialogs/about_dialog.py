@@ -1,8 +1,6 @@
 import sys
 import yt_dlp
-from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QTextBrowser, QDialogButtonBox
-)
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QDialogButtonBox, QFrame
 from PySide6.QtCore import Qt, qVersion
 from utils.constants import CURRENT_APP_VERSION
 
@@ -10,18 +8,75 @@ class AboutDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Tentang mrd YouTube Downloader")
-        self.setMinimumSize(450, 320)
+        self.setModal(True)
+
         layout = QVBoxLayout(self)
-        self.info_text_browser = QTextBrowser(self)
-        self.info_text_browser.setReadOnly(True); self.info_text_browser.setOpenExternalLinks(True)
+
         python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
         yt_dlp_version = "N/A"
-        try: yt_dlp_version = yt_dlp.version.__version__
-        except AttributeError: pass
-        info_content = f"""<html><head><style> a {{ color: #007bff; text-decoration: none; }} a:hover {{ text-decoration: underline; }} </style></head><body> <h2>mrd YouTube Downloader</h2><p>Versi Aplikasi: {CURRENT_APP_VERSION}</p> <p>Aplikasi untuk mengunduh video dan audio dari YouTube dengan mudah.</p> <p><strong>Pembuat:</strong> ridho</p><p><strong>UI Framework:</strong> PySide6</p> <p><strong>Versi Qt:</strong> {qVersion()}</p><p><strong>Versi Python:</strong> {python_version}</p> <p><strong>Versi yt-dlp:</strong> {yt_dlp_version}</p><hr> <p>Dibangun menggunakan pustaka yt-dlp untuk fungsionalitas unduhan inti.</p> <p>© 2024-2025 mrido1</p></body></html>"""
-        self.info_text_browser.setHtml(info_content)
-        self.info_text_browser.setFocusPolicy(Qt.FocusPolicy.WheelFocus)
-        layout.addWidget(self.info_text_browser)
-        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok)
-        button_box.accepted.connect(self.accept); layout.addWidget(button_box)
-        self.info_text_browser.setFocus()
+        try:
+            yt_dlp_version = yt_dlp.version.__version__
+        except AttributeError:
+            pass
+
+        # Judul Aplikasi
+        title_label = QLabel("<b>mrd YouTube Downloader</b>")
+        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
+        layout.addWidget(title_label)
+
+        # Informasi Aplikasi
+        app_version_label = QLabel(f"Versi Aplikasi: {CURRENT_APP_VERSION}")
+        app_version_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
+        layout.addWidget(app_version_label)
+
+        description_label = QLabel("Aplikasi untuk mengunduh video dan audio dari YouTube dengan mudah.")
+        description_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
+        layout.addWidget(description_label)
+
+        creator_label = QLabel("Dibuat oleh: ridho")
+        creator_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
+        layout.addWidget(creator_label)
+
+        gui_framework_label = QLabel("GUI Framework: PySide6")
+        gui_framework_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
+        layout.addWidget(gui_framework_label)
+
+        qt_version_label = QLabel(f"Versi Qt: {qVersion()}")
+        qt_version_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
+        layout.addWidget(qt_version_label)
+
+        python_version_label = QLabel(f"Versi Python: {python_version}")
+        python_version_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
+        layout.addWidget(python_version_label)
+
+        yt_dlp_version_label = QLabel(f"Versi yt-dlp: {yt_dlp_version}")
+        yt_dlp_version_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
+        layout.addWidget(yt_dlp_version_label)
+
+        # Garis Pemisah
+        line = QFrame()
+        line.setFrameShape(QFrame.Shape.HLine)
+        line.setFrameShadow(QFrame.Shadow.Sunken)
+        line.setFocusPolicy(Qt.FocusPolicy.NoFocus) # Garis tidak perlu fokus
+        layout.addWidget(line)
+
+        # Informasi Tambahan
+        built_with_label = QLabel("Dibangun menggunakan pustaka yt-dlp untuk fungsionalitas unduhan inti.")
+        built_with_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
+        layout.addWidget(built_with_label)
+
+        copyright_label = QLabel("© 2024-2025 mrido1")
+        copyright_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
+        layout.addWidget(copyright_label)
+
+        # Spacer untuk mendorong tombol ke bawah
+        layout.addStretch(1)
+
+        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok)
+        self.button_box.accepted.connect(self.accept)
+
+        layout.addWidget(self.button_box)
+        self.setLayout(layout)
+        title_label.setFocus() # Menambahkan ini untuk fokus awal
+        self.resize(450, 320)

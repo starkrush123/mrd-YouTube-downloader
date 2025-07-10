@@ -12,6 +12,7 @@
 - Meningkatkan pengalaman pengguna dengan menyembunyikan hasil pencarian saat video/audio diputar, dan menampilkannya kembali dengan fokus yang benar setelah pemutaran selesai.
 - **Peningkatan Fokus Aplikasi:** Memastikan fokus aplikasi (terutama untuk pembaca layar) kembali ke elemen yang tepat setelah pemutaran video/audio atau unduhan selesai.
 - Memperbaiki beberapa masalah internal yang dapat menyebabkan aplikasi berhenti bekerja secara tiba-tiba.
+- **Peningkatan Dialog Tentang Aplikasi:** Memperbaiki masalah navigasi keyboard dan pembaca layar (screen reader) pada dialog "Tentang Aplikasi" agar lebih mudah digunakan.
 - Mengatasi error yang muncul saat menyimpan perubahan dari jendela Pengaturan.
 - Memperbaiki masalah inisialisasi monitor clipboard.
 - Memperbaiki masalah tema yang tidak diterapkan dengan benar setelah perubahan pengaturan.
