@@ -1,22 +1,17 @@
 import sys
 import os
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QStyle
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QStyle
+from utils.helpers import global_exception_hook
+from ui.main_window import MainWindow
 
-from ui import MainWindow
-from exceptions import global_exception_hook
-
-# Kondisional import untuk NVDA, biar lebih aman
 try:
-    from nvda import connect, disconnect
-    NVDA_AVAILABLE = sys.platform == 'win32'
+    from nvda_control import connect as nvda_connect, disconnect as nvda_disconnect
+    NVDA_CONTROL_AVAILABLE = True
 except (ImportError, OSError):
-    NVDA_AVAILABLE = False
-    # Buat fungsi dummy kalo nvda gak ada
-    def connect(): pass
-    def disconnect(): pass
-
+    NVDA_CONTROL_AVAILABLE = False
+    def nvda_connect(): pass
+    def nvda_disconnect(): pass
 
 if __name__ == "__main__":
     sys.excepthook = global_exception_hook
@@ -32,9 +27,9 @@ if __name__ == "__main__":
         gst_plugin_path = os.path.join(script_dir, 'gst-plugins')
         if os.path.isdir(gst_plugin_path):
             os.environ['GST_PLUGIN_PATH'] = gst_plugin_path + os.pathsep + os.environ.get('GST_PLUGIN_PATH', '')
-
-    if NVDA_AVAILABLE:
-        connect()
+    
+    if NVDA_CONTROL_AVAILABLE:
+        nvda_connect()
 
     app = QApplication(sys.argv)
     icon_path = os.path.join(script_dir, "youtube_downloader_icon.ico")
@@ -44,13 +39,13 @@ if __name__ == "__main__":
         standard_icon = app.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay)
         if not standard_icon.isNull():
             app.setWindowIcon(standard_icon)
-
+    
     main_win = MainWindow()
     main_win.show()
-
+    
     exit_code = app.exec()
-
-    if NVDA_AVAILABLE:
-        disconnect()
-
+    
+    if NVDA_CONTROL_AVAILABLE:
+        nvda_disconnect()
+        
     sys.exit(exit_code)
