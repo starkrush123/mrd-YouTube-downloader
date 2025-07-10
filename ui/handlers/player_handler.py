@@ -23,24 +23,24 @@ class PlayerHandler:
         if state == QMediaPlayer.PlaybackState.StoppedState:
             self.main_window.set_status_text("Playback berhenti/selesai.")
             self.main_window.update_window_title_status("Siap")
-            if self.main_window.stacked_widget.currentWidget() != self.main_window.main_view_widget:
+            if self.main_window.tab_widget.currentWidget() != self.main_window.main_view_widget:
                 self.close_player_view()
             self.main_window.set_ui_busy_state(False, operation_type="playback")
         elif state == QMediaPlayer.PlaybackState.PlayingState:
             self.main_window.set_ui_busy_state(True, operation_type="playback")
             title = self.main_window.current_video_title_for_window
-            if self.main_window.stacked_widget.currentWidget() == self.main_window.audio_player_widget:
+            if self.main_window.tab_widget.currentWidget() == self.main_window.audio_player_widget:
                 self.main_window.set_status_text(f"Audio Aktif: {title}")
                 self.main_window.update_window_title_status(f"Memutar Audio ({title[:20]}...)")
-            elif self.main_window.stacked_widget.currentWidget() == self.main_window.video_player_widget:
+            elif self.main_window.tab_widget.currentWidget() == self.main_window.video_player_widget:
                 self.main_window.set_status_text(f"Video Aktif: {title}")
                 self.main_window.update_window_title_status(f"Memutar Video ({title[:20]}...)")
         elif state == QMediaPlayer.PlaybackState.PausedState:
             title = self.main_window.current_video_title_for_window
-            if self.main_window.stacked_widget.currentWidget() == self.main_window.audio_player_widget:
+            if self.main_window.tab_widget.currentWidget() == self.main_window.audio_player_widget:
                 self.main_window.set_status_text(f"Audio Dijeda: {title}")
                 self.main_window.update_window_title_status(f"Audio Dijeda ({title[:20]}...)")
-            elif self.main_window.stacked_widget.currentWidget() == self.main_window.video_player_widget:
+            elif self.main_window.tab_widget.currentWidget() == self.main_window.video_player_widget:
                 self.main_window.set_status_text(f"Video Dijeda: {title}")
                 self.main_window.update_window_title_status(f"Video Dijeda ({title[:20]}...)")
 
@@ -83,8 +83,8 @@ class PlayerHandler:
         if self.main_window.operation_progress_dialog:
             self.main_window.operation_progress_dialog.accept()
             self.main_window.operation_progress_dialog = None
-        if self.main_window.active_search_results_dialog and self.main_window.active_search_results_dialog.isVisible():
-            self.main_window.active_search_results_dialog.hide()
+        if self.main_window.search_handler.active_search_results_dialog and self.main_window.search_handler.active_search_results_dialog.isVisible():
+            self.main_window.search_handler.active_search_results_dialog.hide()
 
         self.main_window.current_video_title_for_window = title
         if play_video:
@@ -94,10 +94,12 @@ class PlayerHandler:
                 self.main_window.video_player_widget.close_requested.connect(self.close_player_view)
                 self.main_window.video_player_widget.download_requested.connect(self.main_window.download_handler.handle_playback_download_request)
                 self.main_window.video_player_widget.playback_rate_change_requested.connect(self.change_playback_rate)
-                self.main_window.stacked_widget.addWidget(self.main_window.video_player_widget)
+                self.main_window.tab_widget.addTab(self.main_window.video_player_widget, "Video Player")
             self.main_window.video_player_widget.update_title(title)
             if self.main_window.original_geometry is None: self.main_window.original_geometry = self.main_window.geometry()
-            self.main_window.stacked_widget.setCurrentWidget(self.main_window.video_player_widget)
+            self.main_window.tab_widget.setCurrentWidget(self.main_window.video_player_widget)
+            self.main_window.menuBar().hide()
+            self.main_window.tab_widget.tabBar().hide()
             self.main_window.showFullScreen()
             self.main_window.video_player_widget.setFocus()
         else:
@@ -107,10 +109,12 @@ class PlayerHandler:
                 self.main_window.audio_player_widget.close_requested.connect(self.close_player_view)
                 self.main_window.audio_player_widget.download_requested.connect(self.main_window.download_handler.handle_playback_download_request)
                 self.main_window.audio_player_widget.playback_rate_change_requested.connect(self.change_playback_rate)
-                self.main_window.stacked_widget.addWidget(self.main_window.audio_player_widget)
+                self.main_window.tab_widget.addTab(self.main_window.audio_player_widget, "Audio Player")
             self.main_window.audio_player_widget.update_title(title)
             if self.main_window.original_geometry is None: self.main_window.original_geometry = self.main_window.geometry()
-            self.main_window.stacked_widget.setCurrentWidget(self.main_window.audio_player_widget)
+            self.main_window.tab_widget.setCurrentWidget(self.main_window.audio_player_widget)
+            self.main_window.menuBar().hide()
+            self.main_window.tab_widget.tabBar().hide()
             self.main_window.showFullScreen()
             self.main_window.audio_player_widget.setFocus()
 
@@ -150,17 +154,13 @@ class PlayerHandler:
 
     def close_player_view(self):
         self.stop_current_playback()
-        self.main_window.stacked_widget.setCurrentWidget(self.main_window.main_view_widget)
+        self.main_window.tab_widget.setCurrentWidget(self.main_window.main_view_widget)
+        self.main_window.menuBar().show()
+        self.main_window.tab_widget.tabBar().show()
         if self.main_window.original_geometry:
             self.main_window.showNormal()
             self.main_window.setGeometry(self.main_window.original_geometry)
             self.main_window.original_geometry = None
         
         # Restore focus
-        if self.main_window.search_handler.active_search_results_dialog and not self.main_window.search_handler.active_search_results_dialog.isHidden():
-            self.main_window.search_handler.active_search_results_dialog.show()
-            self.main_window.search_handler.active_search_results_dialog.activateWindow()
-            self.main_window.search_handler.active_search_results_dialog.raise_()
-            self.main_window.search_handler.active_search_results_dialog.restore_focus_and_selection(self.main_window.last_selected_search_item_url)
-        else:
-            QTimer.singleShot(250, self.main_window.main_view_widget.input_line_edit.setFocus)
+        QTimer.singleShot(250, self.main_window.events.restore_proper_focus)

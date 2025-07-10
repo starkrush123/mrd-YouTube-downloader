@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QMessageBox
 from PySide6.QtCore import QTimer
 from threads.download_thread import DownloadThread
 from ui.dialogs.progress_dialogs import DownloadProgressDialog
+from utils.history_manager import add_to_history
 
 class DownloadHandler:
     def __init__(self, main_window):
@@ -107,6 +108,9 @@ class DownloadHandler:
 
     def handle_single_playlist_item_download_finished(self, success, message, filepath, current_index, total_items):
         base_filename = os.path.basename(filepath) if filepath else f"Item {current_index+1}"
+        if success:
+            add_to_history(base_filename, filepath)
+            self.main_window.history_tab.refresh_history()
         self.main_window.set_status_text(f"Item {current_index + 1}/{total_items} ('{base_filename}'): {message}")
 
     def handle_batch_overall_finished(self, overall_success, final_batch_summary, base_output_path):
@@ -155,6 +159,10 @@ class DownloadHandler:
 
     def handle_single_download_finished(self, success, message, downloaded_file_path):
         if self.main_window.current_list_batch_download_active: return
+        if success:
+            title = self.main_window.last_downloaded_item_info.get('title', 'Unknown Title')
+            add_to_history(title, downloaded_file_path)
+            self.main_window.history_tab.refresh_history()
         if self.main_window.download_progress_dialog:
             self.main_window.download_progress_dialog.download_complete(success, message)
             QTimer.singleShot(100, lambda s=success, m=message, p=downloaded_file_path: self.close_single_download_dialog_and_notify(s, m, p))

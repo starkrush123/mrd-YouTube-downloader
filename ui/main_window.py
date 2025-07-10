@@ -3,8 +3,9 @@ import os
 import shutil
 
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QStackedWidget, QMessageBox
+    QApplication, QMainWindow, QTabWidget, QMessageBox
 )
+from ui.widgets.history_tab import HistoryTab
 from PySide6.QtCore import (
     QTimer, Qt, QUrl, QStandardPaths
 )
@@ -62,11 +63,14 @@ class MainWindow(MainWindowCore):
         self.last_focused_widget = None
         
 
-        self.stacked_widget = QStackedWidget()
-        self.setCentralWidget(self.stacked_widget)
+        self.tab_widget = QTabWidget()
+        self.setCentralWidget(self.tab_widget)
         
         self.main_view_widget = MainLayout()
-        self.stacked_widget.addWidget(self.main_view_widget)
+        self.history_tab = HistoryTab()
+        
+        self.tab_widget.addTab(self.main_view_widget, "Downloader")
+        self.tab_widget.addTab(self.history_tab, "Riwayat Download")
         
         self._create_menu_bar()
         self.main_view_widget.search_type_combo.currentTextChanged.connect(self.events._update_placeholder_text)

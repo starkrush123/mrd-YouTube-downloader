@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Signal, QStandardPaths
 
 class SettingsDialog(QDialog):
-    settings_changed = Signal()
+    settings_changed = Signal(dict)
     def __init__(self, current_settings, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Pengaturan Aplikasi")
@@ -123,7 +123,7 @@ class SettingsDialog(QDialog):
         self.current_settings['search_result_double_click_action'] = self.double_click_action_combo.currentText()
         self.current_settings['use_parallel_download'] = self.parallel_download_checkbox.isChecked()
         
-        self.settings_changed.emit()
+        self.settings_changed.emit(self.current_settings)
         self.accept()
 
     def get_settings(self): return self.current_settings
