@@ -60,7 +60,10 @@ class MainWindowUpdate:
     def handle_no_update_found(self, message, manual_check):
         if manual_check:
             self.main_window.set_status_text(message)
-            QMessageBox.information(self.main_window, "Cek Pembaruan", message)
+            if "lebih baru dari versi yang tersedia di server" in message:
+                QMessageBox.warning(self.main_window, "Cek Pembaruan", message + "\n\nDisarankan untuk tidak melakukan downgrade.")
+            else:
+                QMessageBox.information(self.main_window, "Cek Pembaruan", message)
 
     def handle_update_check_error(self, error_message, manual_check):
         if manual_check:

@@ -29,6 +29,8 @@ class UpdateCheckThread(QThread):
                 return
             if latest_version > self.current_version:
                 self.update_available.emit(version_info)
+            elif self.current_version > latest_version:
+                self.no_update_found.emit(f"Versi Anda ({self.current_version}) lebih baru dari versi yang tersedia di server ({latest_version}).")
             else:
                 self.no_update_found.emit(f"Versi Anda ({self.current_version}) adalah yang terbaru.")
         except requests.exceptions.RequestException as e:
