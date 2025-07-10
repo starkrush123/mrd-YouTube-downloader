@@ -84,7 +84,6 @@ class PlayerHandler:
             self.main_window.operation_progress_dialog.accept()
             self.main_window.operation_progress_dialog = None
         if self.main_window.active_search_results_dialog and self.main_window.active_search_results_dialog.isVisible():
-            self.main_window.player_launched_from_search_dialog = True
             self.main_window.active_search_results_dialog.hide()
 
         self.main_window.current_video_title_for_window = title
@@ -158,4 +157,10 @@ class PlayerHandler:
             self.main_window.original_geometry = None
         
         # Restore focus
-        QTimer.singleShot(250, self.main_window.main_view_widget.input_line_edit.setFocus)
+        if self.main_window.search_handler.active_search_results_dialog and not self.main_window.search_handler.active_search_results_dialog.isHidden():
+            self.main_window.search_handler.active_search_results_dialog.show()
+            self.main_window.search_handler.active_search_results_dialog.activateWindow()
+            self.main_window.search_handler.active_search_results_dialog.raise_()
+            self.main_window.search_handler.active_search_results_dialog.restore_focus_and_selection(self.main_window.last_selected_search_item_url)
+        else:
+            QTimer.singleShot(250, self.main_window.main_view_widget.input_line_edit.setFocus)

@@ -16,7 +16,7 @@ class SearchHandler:
 
         self.main_window.stop_current_operation(confirm=False)
         if self.active_search_results_dialog and self.active_search_results_dialog.isVisible():
-            self.active_search_results_dialog.reject()
+            self.active_search_results_dialog.close()
             self.active_search_results_dialog = None
 
         if self.main_window.is_youtube_channel_url(txt):
@@ -81,17 +81,11 @@ class SearchHandler:
                 results, self.main_window, result_type=dlg_res_type, settings=self.main_window.settings
             )
             self.active_search_results_dialog.action_triggered.connect(self.handle_action_from_search_dialog)
-            self.active_search_results_dialog.exec() # Use exec() for modal dialog
-            
-            if self.main_window.player_launched_from_search_dialog:
-                self.active_search_results_dialog.show()
-                self.active_search_results_dialog.activateWindow()
-                self.active_search_results_dialog.raise_()
-                self.active_search_results_dialog.restore_focus_and_selection(self.main_window.last_selected_search_item_url)
-                self.main_window.player_launched_from_search_dialog = False
-            else:
-                self.main_window.main_view_widget.input_line_edit.setFocus()
-            self.active_search_results_dialog = None # Clear reference after dialog closes
+            self.active_search_results_dialog.show()
+            self.main_window.main_view_widget.input_line_edit.setFocus()
+
+        # Clear reference after dialog closes (moved to process_input for proper handling)
+        # self.active_search_results_dialog = None
 
     def handle_search_finished(self, result_type, total_count):
         if self.main_window.operation_progress_dialog and self.main_window.operation_progress_dialog.isVisible():
@@ -169,17 +163,11 @@ class SearchHandler:
         )
         self.active_search_results_dialog.action_triggered.connect(self.handle_action_from_search_dialog)
         self.active_search_results_dialog.download_all_playlist_items_requested.connect(self.main_window.download_handler.start_batch_download_list)
-        self.active_search_results_dialog.exec() # Use exec() for modal dialog
+        self.active_search_results_dialog.show()
+        self.main_window.main_view_widget.input_line_edit.setFocus()
 
-        if self.main_window.player_launched_from_search_dialog:
-            self.active_search_results_dialog.show()
-            self.active_search_results_dialog.activateWindow()
-            self.active_search_results_dialog.raise_()
-            self.active_search_results_dialog.restore_focus_and_selection(self.main_window.last_selected_search_item_url)
-            self.main_window.player_launched_from_search_dialog = False
-        else:
-            self.main_window.main_view_widget.input_line_edit.setFocus()
-        self.active_search_results_dialog = None # Clear reference after dialog closes
+        # Clear reference after dialog closes (moved to process_input for proper handling)
+        # self.active_search_results_dialog = None
 
     def handle_list_fetch_error(self, error_message):
         if self.main_window.operation_progress_dialog:
@@ -199,10 +187,8 @@ class SearchHandler:
                 return
             elif item_type == 'video':
                 if action == 'play_video':
-                    self.main_window.player_launched_from_search_dialog = True
                     self.main_window.player_handler.request_stream_info_and_play(url, title, True)
                 elif action == 'play_audio':
-                    self.main_window.player_launched_from_search_dialog = True
                     self.main_window.player_handler.request_stream_info_and_play(url, title, False)
                 elif action == 'download_video' or action == 'download_audio':
                     self.main_window.last_downloaded_item_info = {'url': url, 'title': title, 'type': 'video' if action == 'download_video' else 'audio'}
