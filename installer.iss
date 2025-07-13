@@ -28,7 +28,7 @@ DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 ;PrivilegesRequired=lowest
 OutputDir=D:\
-OutputBaseFilename=mrd-YouTube-downloader1.5.0
+OutputBaseFilename=mrd-YouTube-downloader1.5.2
 SolidCompression=yes
 WizardStyle=modern
 
