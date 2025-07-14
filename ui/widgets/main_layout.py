@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QComboBox, QProgressBar, QLabel
 )
+from PySide6.QtCore import Qt
 
 class MainLayout(QWidget):
     def __init__(self, parent=None):
@@ -47,5 +48,6 @@ class MainLayout(QWidget):
         self.status_label = QLabel("Siap. Masukkan URL atau kata kunci.")
         self.status_label.setWordWrap(True)
         self.status_label.setProperty("accessibleLiveRegion", "polite")
+        self.status_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
         main_layout.addWidget(self.status_label)
         main_layout.addStretch()

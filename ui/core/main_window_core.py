@@ -46,6 +46,9 @@ class MainWindowCore(QMainWindow):
         self.search_thread = None
         self.playlist_fetch_thread = None
         self.channel_fetch_thread = None
+        self._status_reset_timer = QTimer(self)
+        self._status_reset_timer.setSingleShot(True)
+        self._status_reset_timer.timeout.connect(lambda: self.main_view_widget.status_label.setText("Siap"))
 
         self.setWindowTitle(self.BASE_TITLE)
         self.set_initial_window_geometry()
@@ -85,6 +88,9 @@ class MainWindowCore(QMainWindow):
         self.main_view_widget.status_label.setText(text)
         if NVDA_CONTROL_AVAILABLE:
             nvda_speak(text, interrupt=True)
+        
+        if text != "Siap":
+            self._status_reset_timer.start(5000)
 
     def set_initial_window_geometry(self):
         window_width = 800
@@ -194,9 +200,13 @@ class MainWindowCore(QMainWindow):
                              (self.update_progress_dialog and self.update_progress_dialog.isVisible())
         active_threads = [
             self.stream_info_thread, self.download_thread, self.search_thread,
-            self.playlist_fetch_thread, self.channel_fetch_thread, self.update_check_thread, self.download_update_thread
+            self.playlist_fetch_thread, self.channel_fetch_thread, self.download_update_thread
         ]
         is_any_thread_running = any(t and t.isRunning() for t in active_threads)
+
+        # Special handling for update_check_thread during initial startup
+        if self.update_check_thread and self.update_check_thread.isRunning() and not self._is_initial_startup_check:
+            is_any_thread_running = True
         
         effective_busy_state = busy or is_any_thread_running or is_dialog_blocking or self.current_list_batch_download_active
         if operation_type == "playback" or operation_type == "playback_loading":

@@ -92,7 +92,6 @@ class MainWindow(MainWindowCore):
         self.app_settings.apply_theme()
         self.events.init_clipboard_monitor()
         
-        QTimer.singleShot(0, self.main_view_widget.input_line_edit.setFocus)
         QTimer.singleShot(2000, lambda: self.update_manager.initiate_update_check(manual_check=False))
 
     def _create_menu_bar(self):
