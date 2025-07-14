@@ -1,16 +1,13 @@
 import os
 import json
 import sys
-import subprocess
-import webbrowser
 import shutil
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QProgressDialog
-from PySide6.QtCore import Qt, QUrl, QTimer, QStandardPaths
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PySide6.QtCore import QUrl, QTimer, QStandardPaths
 from PySide6.QtGui import QDesktopServices
 
 from utils import constants
 from utils.constants import set_debug_mode
-from utils.styles import LIGHT_THEME_STYLESHEET, DARK_THEME_STYLESHEET
 
 try:
     from nvda_control import speak as nvda_speak
@@ -72,7 +69,8 @@ class MainWindowCore(QMainWindow):
             'monitor_clipboard': True,
             'embed_metadata': True,
             'use_parallel_download': False,
-            'playback_rate': 1.0
+            'playback_rate': 1.0,
+            'audio_output_device_id': None
         }
         self.settings = self.default_settings.copy()
         self.load_app_settings()
@@ -108,27 +106,39 @@ class MainWindowCore(QMainWindow):
 
     def stop_active_threads(self, exclude_stream_info=False, exclude_download_thread=False, exclude_playlist_fetch_thread=False, exclude_search_thread=False, exclude_channel_fetch_thread=False):
         threads_to_stop = []
-        if not exclude_download_thread and self.download_thread: threads_to_stop.append(self.download_thread)
-        if not exclude_search_thread and self.search_thread: threads_to_stop.append(self.search_thread)
-        if not exclude_stream_info and self.stream_info_thread: threads_to_stop.append(self.stream_info_thread)
-        if not exclude_playlist_fetch_thread and self.playlist_fetch_thread: threads_to_stop.append(self.playlist_fetch_thread)
-        if not exclude_channel_fetch_thread and self.channel_fetch_thread: threads_to_stop.append(self.channel_fetch_thread)
-        if self.update_check_thread and self.update_check_thread.isRunning(): threads_to_stop.append(self.update_check_thread)
+        if not exclude_download_thread and self.download_thread:
+            threads_to_stop.append(self.download_thread)
+        if not exclude_search_thread and self.search_thread:
+            threads_to_stop.append(self.search_thread)
+        if not exclude_stream_info and self.stream_info_thread:
+            threads_to_stop.append(self.stream_info_thread)
+        if not exclude_playlist_fetch_thread and self.playlist_fetch_thread:
+            threads_to_stop.append(self.playlist_fetch_thread)
+        if not exclude_channel_fetch_thread and self.channel_fetch_thread:
+            threads_to_stop.append(self.channel_fetch_thread)
+        if self.update_check_thread and self.update_check_thread.isRunning():
+            threads_to_stop.append(self.update_check_thread)
         if self.download_update_thread and self.download_update_thread.isRunning():
             self.download_update_thread.stop()
             threads_to_stop.append(self.download_update_thread)
         for thread in threads_to_stop:
             if thread and thread.isRunning():
-                if hasattr(thread, 'stop') and thread != self.download_update_thread : thread.stop()
+                if hasattr(thread, 'stop') and thread != self.download_update_thread:
+                    thread.stop()
                 thread.quit()
                 if not thread.wait(700):
                     thread.terminate()
                     thread.wait(100)
-        if not exclude_download_thread: self.download_thread = None
-        if not exclude_search_thread: self.search_thread = None
-        if not exclude_stream_info: self.stream_info_thread = None
-        if not exclude_playlist_fetch_thread: self.playlist_fetch_thread = None
-        if not exclude_channel_fetch_thread: self.channel_fetch_thread = None
+        if not exclude_download_thread:
+            self.download_thread = None
+        if not exclude_search_thread:
+            self.search_thread = None
+        if not exclude_stream_info:
+            self.stream_info_thread = None
+        if not exclude_playlist_fetch_thread:
+            self.playlist_fetch_thread = None
+        if not exclude_channel_fetch_thread:
+            self.channel_fetch_thread = None
         self.update_check_thread = None
         self.download_update_thread = None
         if not exclude_download_thread and self.download_progress_dialog:
@@ -185,16 +195,17 @@ class MainWindowCore(QMainWindow):
             try:
                 os.makedirs(config_dir, exist_ok=True)
             except OSError as e:
-                if show_error: QMessageBox.warning(self, "Gagal Simpan Pengaturan", f"Gagal membuat direktori konfigurasi: {config_dir}\nError: {e}")
+                if show_error:
+                    QMessageBox.warning(self, "Gagal Simpan Pengaturan", f"Gagal membuat direktori konfigurasi: {config_dir}\nError: {e}")
                 return
         try:
             with open(constants.CONFIG_FILE, 'w') as f:
                 json.dump(self.settings, f, indent=4)
         except IOError as e:
-            if show_error: QMessageBox.warning(self, "Gagal Simpan Pengaturan", f"Gagal simpan ke {constants.CONFIG_FILE}: {e}")
+            if show_error:
+                QMessageBox.warning(self, "Gagal Simpan Pengaturan", f"Gagal simpan ke {constants.CONFIG_FILE}: {e}")
 
     def set_ui_busy_state(self, busy, operation_type="general"):
-        is_media_playing = self.media_player.playbackState() in [self.media_player.PlaybackState.PlayingState, self.media_player.PlaybackState.PausedState]
         is_dialog_blocking = (self.operation_progress_dialog and self.operation_progress_dialog.isVisible()) or \
                              (self.download_progress_dialog and self.download_progress_dialog.isVisible()) or \
                              (self.update_progress_dialog and self.update_progress_dialog.isVisible())
@@ -250,8 +261,11 @@ class MainWindowCore(QMainWindow):
                 QMessageBox.warning(self, "Lokasi Tidak Ditemukan", f"Path tidak valid: {norm_path}")
                 return
             if not QDesktopServices.openUrl(QUrl.fromLocalFile(norm_path)):
-                if sys.platform == 'win32': os.startfile(norm_path)
-                elif sys.platform == 'darwin': os.system(f'open "{norm_path}"')
-                else: os.system(f'xdg-open "{norm_path}"')
+                if sys.platform == 'win32':
+                    os.startfile(norm_path)
+                elif sys.platform == 'darwin':
+                    os.system(f'open "{norm_path}"')
+                else:
+                    os.system(f'xdg-open "{norm_path}"')
         except Exception as e:
             QMessageBox.warning(self, "Gagal Buka Lokasi", f"Tidak dapat membuka: {norm_path}\nError: {str(e)}")

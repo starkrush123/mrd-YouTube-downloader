@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
     QLabel, QFileDialog, QDialogButtonBox, QGridLayout, QSpinBox, QCheckBox, QMessageBox
 )
 from PySide6.QtCore import Signal, QStandardPaths
+from ui.dialogs.audio_output_dialog import AudioOutputDialog
 
 class SettingsDialog(QDialog):
     settings_changed = Signal(dict)
@@ -38,6 +39,10 @@ class SettingsDialog(QDialog):
         self.clipboard_monitor_checkbox = QCheckBox("Pantau Clipboard untuk URL YouTube")
         self.clipboard_monitor_checkbox.setChecked(self.current_settings.get('monitor_clipboard', True))
         general_group_layout.addWidget(self.clipboard_monitor_checkbox, 1, 0, 1, 2)
+
+        self.audio_output_button = QPushButton("Pilih Perangkat Output Audio")
+        self.audio_output_button.clicked.connect(self.select_audio_output_device)
+        general_group_layout.addWidget(self.audio_output_button, 2, 0, 1, 2)
         layout.addLayout(general_group_layout)
         
         search_results_label = QLabel("Jumlah Hasil Pencarian:")
@@ -108,7 +113,8 @@ class SettingsDialog(QDialog):
 
     def select_output_directory(self):
         directory = QFileDialog.getExistingDirectory(self, "Pilih Folder Penyimpanan", self.dir_line_edit.text())
-        if directory: self.dir_line_edit.setText(directory)
+        if directory:
+            self.dir_line_edit.setText(directory)
 
     def accept_settings(self):
         self.current_settings['output_path'] = self.dir_line_edit.text()
@@ -127,3 +133,13 @@ class SettingsDialog(QDialog):
         self.accept()
 
     def get_settings(self): return self.current_settings
+
+    def select_audio_output_device(self):
+        dialog = AudioOutputDialog(self)
+        if dialog.exec() == QDialog.Accepted:
+            selected_device_id = dialog.get_selected_device()
+            if selected_device_id:
+                self.current_settings['audio_output_device_id'] = selected_device_id
+                QMessageBox.information(self, "Perangkat Audio", "Perangkat output audio berhasil disimpan.")
+            else:
+                QMessageBox.warning(self, "Perangkat Audio", "Tidak ada perangkat output audio yang dipilih.")
