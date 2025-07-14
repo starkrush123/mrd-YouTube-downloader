@@ -33,7 +33,7 @@ class MainWindowUpdate:
         self.main_window.update_check_thread.update_check_error.connect(lambda msg: self.handle_update_check_error(msg, manual_check))
         self.main_window.update_check_thread.finished.connect(self._try_restore_focus_after_manual_check)
         self.main_window.update_check_thread.finished.connect(self.main_window._on_any_thread_finished)
-        self.main_window.set_ui_busy_state(True, "update_checking")
+        if manual_check: self.main_window.set_ui_busy_state(True, "update_checking")
         self.main_window.update_check_thread.start()
 
     def handle_update_available(self, version_info, manual_check):
