@@ -1,3 +1,5 @@
+**Peringatan Penting:** Saat ini, ada masalah yang diketahui terkait perpindahan otomatis perangkat output audio. Jika perangkat audio default Windows berubah saat pemutaran berlangsung, suara mungkin tidak berpindah ke perangkat baru secara otomatis. Perpindahan perangkat audio secara manual melalui pengaturan aplikasi berfungsi dengan baik. Kami sedang berupaya memperbaikinya.
+
 Aplikasi ini masih dalam pengembangan aktif. Jika kalian menemukan bug atau punya saran fitur, jangan ragu untuk melaporkannya!
 
 # mrd YouTube Downloader

@@ -1,18 +1,82 @@
 from PySide6.QtWidgets import QMessageBox
-from PySide6.QtCore import QUrl, QTimer, Qt
-from PySide6.QtMultimedia import QMediaPlayer
+from PySide6.QtCore import QUrl, QTimer
+from PySide6.QtMultimedia import QMediaPlayer, QMediaDevices
 from threads.stream_thread import StreamInfoThread
 from ui.dialogs.progress_dialogs import OperationProgressDialog
-from ui.widgets.players import VideoPlayerWidget, AudioPlayerWidget
+from ui.widgets.video_player_widget import VideoPlayerWidget
+from ui.widgets.audio_player_widget import AudioPlayerWidget
 from nvda_control import speak as nvda_speak
 
 class PlayerHandler:
     def __init__(self, main_window):
         self.main_window = main_window
+        self.set_audio_output_device()
+        self.media_devices = QMediaDevices()
+        self.media_devices.audioOutputsChanged.connect(self._handle_default_audio_output_changed)
+
+    def _handle_default_audio_output_changed(self):
+        print("[_handle_default_audio_output_changed] Dipanggil. Memanggil set_audio_output_device untuk re-evaluasi.")
+        self.set_audio_output_device()
+
+
+    def set_audio_output_device(self):
+        print("[set_audio_output_device] Dipanggil.")
+        device_id = self.main_window.settings.get('audio_output_device_id')
+        print(f"[set_audio_output_device] Device ID dari pengaturan: {device_id}")
+
+        was_playing = self.main_window.media_player.playbackState() == QMediaPlayer.PlaybackState.PlayingState
+        if was_playing:
+            self.main_window.media_player.pause() # Pause playback temporarily
+
+        target_device = None
+        available_devices = QMediaDevices.audioOutputs()
+        print(f"[set_audio_output_device] Perangkat yang tersedia: {[d.description() for d in available_devices]}")
+
+        if device_id == "default" or device_id is None:
+            target_device = QMediaDevices.defaultAudioOutput()
+            print(f"[set_audio_output_device] Target perangkat (default/None): {target_device.description() if target_device else 'None'}")
+        else:
+            # Try to find the saved device
+            for device in available_devices:
+                if device.id() == device_id:
+                    target_device = device
+                    print(f"[set_audio_output_device] Target perangkat (tersimpan): {target_device.description()}")
+                    break
+            if not target_device:
+                print("[set_audio_output_device] Perangkat tersimpan tidak ditemukan. Mencoba fallback ke default.")
+                self.main_window.set_status_text("Perangkat audio tersimpan tidak ditemukan atau tidak valid, mencoba menggunakan default.")
+                # Fallback to default if saved device is not found
+                target_device = QMediaDevices.defaultAudioOutput()
+                self.main_window.settings['audio_output_device_id'] = "default" # Update setting to default
+                self.main_window.save_app_settings(show_error=False)
+
+        # Now, attempt to set the target_device and validate it
+        if target_device and target_device in available_devices:
+            self.main_window.audio_output.setDevice(target_device)
+            print(f"[set_audio_output_device] Berhasil mengatur perangkat ke: {target_device.description()}")
+            self.main_window.set_status_text(f"Perangkat output audio diubah ke: {target_device.description()}")
+        else:
+            # If target_device is None or not in available_devices (meaning it's invalid/disconnected)
+            # Try to set the current default device as a last resort
+            final_fallback_device = QMediaDevices.defaultAudioOutput()
+            if final_fallback_device and final_fallback_device in available_devices:
+                self.main_window.audio_output.setDevice(final_fallback_device)
+                self.main_window.settings['audio_output_device_id'] = "default"
+                self.main_window.save_app_settings(show_error=False)
+                print(f"[set_audio_output_device] Berhasil fallback ke perangkat default: {final_fallback_device.description()}")
+                self.main_window.set_status_text(f"Perangkat audio tersimpan tidak ditemukan atau tidak valid, menggunakan default: {final_fallback_device.description()}.")
+            else:
+                print("[set_audio_output_device] Tidak dapat menemukan perangkat audio yang valid, bahkan perangkat default.")
+                self.main_window.set_status_text("Tidak dapat menemukan perangkat audio yang valid, bahkan perangkat default.")
+        
+        if was_playing:
+            self.main_window.media_player.play() # Resume playback
 
     def handle_media_player_error(self, error: QMediaPlayer.Error = QMediaPlayer.Error.NoError):
         if error != QMediaPlayer.Error.NoError:
-            if self.main_window.operation_progress_dialog and self.main_window.operation_progress_dialog.isVisible(): self.main_window.operation_progress_dialog.reject(); self.main_window.operation_progress_dialog = None
+            if self.main_window.operation_progress_dialog and self.main_window.operation_progress_dialog.isVisible():
+                self.main_window.operation_progress_dialog.reject()
+                self.main_window.operation_progress_dialog = None
             QMessageBox.critical(self.main_window, "Kesalahan Media Player", f"Error: {self.main_window.media_player.errorString() or 'Kesalahan tidak diketahui'}")
             self.stop_current_playback()
 
@@ -67,7 +131,8 @@ class PlayerHandler:
         self.main_window.set_status_text(f"Mengambil info stream: {title_hint}...")
         self.main_window.update_window_title_status("Mengambil Info Stream")
         self.main_window.set_ui_busy_state(True, operation_type="playback_loading")
-        if self.main_window.operation_progress_dialog: self.main_window.operation_progress_dialog.close()
+        if self.main_window.operation_progress_dialog:
+            self.main_window.operation_progress_dialog.close()
         self.main_window.operation_progress_dialog = OperationProgressDialog(f"Memuat {('Video' if play_video else 'Audio')}: {title_hint[:30]}...", self.main_window)
         self.main_window.operation_progress_dialog.show()
         if self.main_window.stream_info_thread and self.main_window.stream_info_thread.isRunning():
@@ -96,7 +161,8 @@ class PlayerHandler:
                 self.main_window.video_player_widget.playback_rate_change_requested.connect(self.change_playback_rate)
                 self.main_window.tab_widget.addTab(self.main_window.video_player_widget, "Video Player")
             self.main_window.video_player_widget.update_title(title)
-            if self.main_window.original_geometry is None: self.main_window.original_geometry = self.main_window.geometry()
+            if self.main_window.original_geometry is None:
+                self.main_window.original_geometry = self.main_window.geometry()
             self.main_window.tab_widget.setCurrentWidget(self.main_window.video_player_widget)
             self.main_window.menuBar().hide()
             self.main_window.tab_widget.tabBar().hide()
@@ -111,7 +177,8 @@ class PlayerHandler:
                 self.main_window.audio_player_widget.playback_rate_change_requested.connect(self.change_playback_rate)
                 self.main_window.tab_widget.addTab(self.main_window.audio_player_widget, "Audio Player")
             self.main_window.audio_player_widget.update_title(title)
-            if self.main_window.original_geometry is None: self.main_window.original_geometry = self.main_window.geometry()
+            if self.main_window.original_geometry is None:
+                self.main_window.original_geometry = self.main_window.geometry()
             self.main_window.tab_widget.setCurrentWidget(self.main_window.audio_player_widget)
             self.main_window.menuBar().hide()
             self.main_window.tab_widget.tabBar().hide()
@@ -164,3 +231,18 @@ class PlayerHandler:
         
         # Restore focus
         QTimer.singleShot(250, self.main_window.events.restore_proper_focus)
+
+        # Remove player tabs and clear references
+        if self.main_window.video_player_widget:
+            idx = self.main_window.tab_widget.indexOf(self.main_window.video_player_widget)
+            if idx != -1:
+                self.main_window.tab_widget.removeTab(idx)
+            self.main_window.video_player_widget.deleteLater()
+            self.main_window.video_player_widget = None
+        
+        if self.main_window.audio_player_widget:
+            idx = self.main_window.tab_widget.indexOf(self.main_window.audio_player_widget)
+            if idx != -1:
+                self.main_window.tab_widget.removeTab(idx)
+            self.main_window.audio_player_widget.deleteLater()
+            self.main_window.audio_player_widget = None
