@@ -17,7 +17,6 @@ Halo semua! Selamat datang di mrd YouTube Downloader, aplikasi simpel tapi power
 *   **Pengaturan Fleksibel:** Atur sendiri format unduhan (MP4, MP3, dll.), lokasi penyimpanan, sampai tema aplikasi.
 *   **Pantau Clipboard:** Aplikasi ini bisa otomatis mendeteksi URL YouTube yang kalian salin ke clipboard, jadi proses ngunduh makin cepat.
 *   **Pembaruan Otomatis:** Selalu dapat versi terbaru dengan fitur dan perbaikan bug.
-*   **Mode Debug:** Buat kalian yang suka ngoprek atau nemu masalah, ada mode debug buat lihat log aplikasi.
 *   **Panel AI (Eksperimental):** Ngobrol langsung sama aplikasi! Gunakan bahasa natural untuk mencari, mengunduh, atau memutar video. Fitur ini masih dalam pengembangan awal, jadi mohon maklum kalau ada yang kurang sempurna ya.
 
 ## Cara Pakai

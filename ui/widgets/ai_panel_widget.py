@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QTextEdit, QPushButton, QLabel, QHBoxLayout
+from PySide6.QtCore import Qt
 
 class AIPanelWidget(QWidget):
     def __init__(self, parent=None):
@@ -21,3 +22,5 @@ class AIPanelWidget(QWidget):
 
         self.send_button = QPushButton("Kirim")
         self.layout.addWidget(self.send_button)
+
+        self.input_field.returnPressed.connect(self.send_button.click)
