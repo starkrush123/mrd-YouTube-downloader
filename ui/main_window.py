@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QApplication, QMainWindow, QTabWidget, QMessageBox
 )
 from ui.widgets.history_tab import HistoryTab
+from ui.widgets.ai_panel_widget import AIPanelWidget
 from PySide6.QtCore import (
     QTimer, Qt, QUrl, QStandardPaths
 )
@@ -28,6 +29,8 @@ from ui.handlers.download_handler import DownloadHandler
 from ui.handlers.player_handler import PlayerHandler
 from ui.handlers.dialog_handler import DialogHandler
 from ui.handlers.signal_connector import SignalConnector
+from utils.gemini_client import GeminiClient
+from ui.handlers.ai_handler import AIHandler
 
 # Import refactored modules
 from ui.core.main_window_core import MainWindowCore
@@ -68,9 +71,11 @@ class MainWindow(MainWindowCore):
         
         self.main_view_widget = MainLayout()
         self.history_tab = HistoryTab()
+        self.ai_panel_widget = AIPanelWidget()
         
-        self.tab_widget.addTab(self.main_view_widget, "Downloader")
+        self.tab_widget.addTab(self.main_view_widget, "Main")
         self.tab_widget.addTab(self.history_tab, "Riwayat Download")
+        self.tab_widget.addTab(self.ai_panel_widget, "AI Panel")
         
         self._create_menu_bar()
         self.main_view_widget.search_type_combo.currentTextChanged.connect(self.events._update_placeholder_text)
@@ -82,6 +87,10 @@ class MainWindow(MainWindowCore):
         self.player_handler = PlayerHandler(self)
         self.dialog_handler = DialogHandler(self)
         
+        # Initialize Gemini Client and AI Handler
+        self.gemini_client = GeminiClient()
+        self.ai_handler = AIHandler(self, self.gemini_client)
+
         self.setup_shortcuts()
 
         # Signal Connector
@@ -174,6 +183,9 @@ class MainWindow(MainWindowCore):
 
     def restore_focus_after_download(self):
         self.events.restore_focus_after_download()
+
+    def restore_proper_focus(self, item_url_to_focus=None):
+        self.events.restore_proper_focus(item_url_to_focus=item_url_to_focus)
 
     def update_window_title_status(self, status_text=""):
         super().update_window_title_status(status_text)

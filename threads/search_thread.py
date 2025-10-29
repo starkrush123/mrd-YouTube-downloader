@@ -3,8 +3,37 @@ import re
 import yt_dlp
 import traceback
 from PySide6.QtCore import QThread, Signal
-from utils.constants import SEARCH_CACHE, CACHE_EXPIRY_SECONDS
+from utils.constants import (
+    SEARCH_CACHE,
+    CACHE_EXPIRY_SECONDS,
+    MAX_SEARCH_CACHE_ENTRIES,
+    CACHE_LOCK,
+)
 from utils.helpers import dprint
+
+def _cleanup_and_get_from_cache(cache_key, now):
+    with CACHE_LOCK:
+        entry = SEARCH_CACHE.get(cache_key)
+        if entry:
+            data, timestamp = entry
+            if now - timestamp < CACHE_EXPIRY_SECONDS:
+                SEARCH_CACHE.move_to_end(cache_key)
+                return data
+            SEARCH_CACHE.pop(cache_key, None)
+        stale_keys = [
+            key for key, (_, ts) in SEARCH_CACHE.items()
+            if now - ts >= CACHE_EXPIRY_SECONDS
+        ]
+        for key in stale_keys:
+            SEARCH_CACHE.pop(key, None)
+    return None
+
+def _store_in_cache(cache_key, data):
+    with CACHE_LOCK:
+        SEARCH_CACHE[cache_key] = (data, time.time())
+        SEARCH_CACHE.move_to_end(cache_key)
+        while len(SEARCH_CACHE) > MAX_SEARCH_CACHE_ENTRIES:
+            SEARCH_CACHE.popitem(last=False)
 
 class SearchThread(QThread):
     results_batch_ready = Signal(list, str)
@@ -19,13 +48,13 @@ class SearchThread(QThread):
     def run(self):
         cache_key = (self.query.lower(), self.search_type, self.limit_count)
         result_type = "video" if self.search_type == "Video" else "playlist_search_results"
-        if cache_key in SEARCH_CACHE:
-            data, timestamp = SEARCH_CACHE[cache_key]
-            if time.time() - timestamp < CACHE_EXPIRY_SECONDS:
-                dprint(f"Mengambil hasil pencarian dari cache untuk: {self.query}")
-                self.results_batch_ready.emit(data, result_type)
-                self.search_finished.emit(result_type, len(data))
-                return
+        now = time.time()
+        cached_data = _cleanup_and_get_from_cache(cache_key, now)
+        if cached_data is not None:
+            dprint(f"Mengambil hasil pencarian dari cache untuk: {self.query}")
+            self.results_batch_ready.emit(cached_data, result_type)
+            self.search_finished.emit(result_type, len(cached_data))
+            return
         try:
             entries = []
             if self.search_type == "Video":
@@ -50,7 +79,7 @@ class SearchThread(QThread):
                             entries.append(entry)
             if entries:
                 dprint(f"Pencarian ditemukan {len(entries)} hasil untuk: {self.query}")
-                SEARCH_CACHE[cache_key] = (entries, time.time())
+                _store_in_cache(cache_key, entries)
                 
                 progressive_yield_point = 3
                 initial_batch = entries[:progressive_yield_point]
