@@ -1,3 +1,5 @@
+**Peringatan Penting:** Fitur Panel AI masih dalam tahap sangat eksperimental. Mungkin ada perilaku yang tidak terduga atau respons yang tidak akurat. Kami sedang terus mengembangkannya untuk pengalaman yang lebih baik.
+
 **Peringatan Penting:** Saat ini, ada masalah yang diketahui terkait perpindahan otomatis perangkat output audio. Jika perangkat audio default Windows berubah saat pemutaran berlangsung, suara mungkin tidak berpindah ke perangkat baru secara otomatis. Perpindahan perangkat audio secara manual melalui pengaturan aplikasi berfungsi dengan baik. Kami sedang berupaya memperbaikinya.
 
 Aplikasi ini masih dalam pengembangan aktif. Jika kalian menemukan bug atau punya saran fitur, jangan ragu untuk melaporkannya!
@@ -16,6 +18,7 @@ Halo semua! Selamat datang di mrd YouTube Downloader, aplikasi simpel tapi power
 *   **Pantau Clipboard:** Aplikasi ini bisa otomatis mendeteksi URL YouTube yang kalian salin ke clipboard, jadi proses ngunduh makin cepat.
 *   **Pembaruan Otomatis:** Selalu dapat versi terbaru dengan fitur dan perbaikan bug.
 *   **Mode Debug:** Buat kalian yang suka ngoprek atau nemu masalah, ada mode debug buat lihat log aplikasi.
+*   **Panel AI (Eksperimental):** Ngobrol langsung sama aplikasi! Gunakan bahasa natural untuk mencari, mengunduh, atau memutar video. Fitur ini masih dalam pengembangan awal, jadi mohon maklum kalau ada yang kurang sempurna ya.
 
 ## Cara Pakai
 

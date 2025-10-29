@@ -1,5 +1,7 @@
 import sys
 import shutil
+import keyring
+
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QComboBox, 
     QLabel, QFileDialog, QDialogButtonBox, QGridLayout, QSpinBox, QCheckBox, QMessageBox
@@ -39,6 +41,16 @@ class SettingsDialog(QDialog):
         self.clipboard_monitor_checkbox = QCheckBox("Pantau Clipboard untuk URL YouTube")
         self.clipboard_monitor_checkbox.setChecked(self.current_settings.get('monitor_clipboard', True))
         general_group_layout.addWidget(self.clipboard_monitor_checkbox, 1, 0, 1, 2)
+
+        gemini_api_key_label = QLabel("Kunci API Gemini:")
+        
+        # Load API key from keyring
+        gemini_api_key = keyring.get_password("mrd-youtube-downloader", "gemini_api_key")
+        self.gemini_api_key_line_edit = QLineEdit(gemini_api_key if gemini_api_key else '')
+        
+        gemini_api_key_label.setBuddy(self.gemini_api_key_line_edit)
+        general_group_layout.addWidget(gemini_api_key_label, 3, 0)
+        general_group_layout.addWidget(self.gemini_api_key_line_edit, 3, 1)
 
         self.audio_output_button = QPushButton("Pilih Perangkat Output Audio")
         self.audio_output_button.clicked.connect(self.select_audio_output_device)
@@ -117,6 +129,13 @@ class SettingsDialog(QDialog):
             self.dir_line_edit.setText(directory)
 
     def accept_settings(self):
+        # Save API key to keyring
+        api_key = self.gemini_api_key_line_edit.text()
+        if api_key:
+            keyring.set_password("mrd-youtube-downloader", "gemini_api_key", api_key)
+        else:
+            keyring.delete_password("mrd-youtube-downloader", "gemini_api_key")
+
         self.current_settings['output_path'] = self.dir_line_edit.text()
         self.current_settings['theme'] = self.theme_combo.currentText()
         self.current_settings['monitor_clipboard'] = self.clipboard_monitor_checkbox.isChecked()
