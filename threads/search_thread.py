@@ -2,6 +2,7 @@ import time
 import re
 import yt_dlp
 import traceback
+import urllib.parse
 from PySide6.QtCore import QThread, Signal
 from utils.constants import (
     SEARCH_CACHE,
@@ -68,15 +69,7 @@ class SearchThread(QThread):
                 elif result and result.get('_type') == 'video':
                     entries = [result]
             elif self.search_type == "Playlist":
-                ydl_opts_playlist_search = {'quiet': True, 'nocheckcertificate': True, 'skip_download': True, 'extract_flat': True, 'ignoreerrors': True}
-                search_query_playlist = f"ytsearch{self.limit_count}:\"{self.query}\""
-                with yt_dlp.YoutubeDL(ydl_opts_playlist_search) as ydl:
-                    result = ydl.extract_info(search_query_playlist, download=False)
-                
-                if result and 'entries' in result:
-                    for entry in result['entries']:
-                        if entry and entry.get('_type') == 'playlist':
-                            entries.append(entry)
+                entries = self._search_playlists_direct(self.query, self.limit_count)
             if entries:
                 dprint(f"Pencarian ditemukan {len(entries)} hasil untuk: {self.query}")
                 _store_in_cache(cache_key, entries)
@@ -105,6 +98,80 @@ class SearchThread(QThread):
         except Exception as e:
             dprint(f"Error di SearchThread: {traceback.format_exc()}")
             self.search_error.emit(f"Kesalahan tak terduga: {str(e)}")
+
+    def _search_playlists_direct(self, query, limit_count):
+        try:
+            max_results = max(1, int(limit_count))
+        except (TypeError, ValueError):
+            max_results = 10
+        encoded_query = urllib.parse.quote(query)
+        playlist_search_url = (
+            f"https://www.youtube.com/results?search_query={encoded_query}&sp=EgIQAw%253D%253D"
+        )
+        ydl_opts = {
+            'quiet': True,
+            'nocheckcertificate': True,
+            'skip_download': True,
+            'extract_flat': 'in_playlist',
+            'noplaylist': False,
+            'ignoreerrors': True,
+            'force_generic_extractor': True,
+        }
+        collected = []
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(playlist_search_url, download=False)
+        except Exception as exc:
+            dprint(f"Playlist search failed for '{query}': {exc}")
+            return collected
+
+        raw_entries = []
+        if isinstance(info, dict):
+            if info.get('entries'):
+                raw_entries = info['entries']
+            elif info.get('_type') == 'playlist':
+                raw_entries = info.get('entries', [])
+
+        for entry in raw_entries:
+            if not entry:
+                continue
+
+            entry_ie = entry.get('ie_key')
+            entry_type = entry.get('_type')
+
+            if entry_type == 'playlist' or entry_ie in ('YoutubePlaylist', 'YoutubeTab'):
+                playlist_url = entry.get('webpage_url') or entry.get('url')
+                if not playlist_url:
+                    playlist_id = entry.get('id')
+                    if playlist_id:
+                        playlist_url = f"https://www.youtube.com/playlist?list={playlist_id}"
+                if not playlist_url:
+                    continue
+
+                thumbnails = entry.get('thumbnails')
+                if isinstance(thumbnails, list) and thumbnails:
+                    thumbnail_url = thumbnails[-1].get('url')
+                else:
+                    thumbnail_url = entry.get('thumbnail')
+
+                normalized_entry = {
+                    '_type': 'playlist',
+                    'id': entry.get('id'),
+                    'title': entry.get('title', 'Playlist Tanpa Judul'),
+                    'webpage_url': playlist_url,
+                    'url': playlist_url,
+                    'uploader': entry.get('uploader') or entry.get('channel') or '',
+                    'thumbnail': thumbnail_url,
+                    'thumbnails': thumbnails,
+                    'playlist_count': entry.get('playlist_count') or entry.get('view_count'),
+                    'description': entry.get('description'),
+                }
+                collected.append(normalized_entry)
+
+            if len(collected) >= max_results:
+                break
+
+        return collected
 
 class PlaylistFetchThread(QThread):
     results_ready = Signal(list, str, str)
