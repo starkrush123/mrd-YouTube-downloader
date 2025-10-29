@@ -70,7 +70,8 @@ class MainWindowCore(QMainWindow):
             'embed_metadata': True,
             'use_parallel_download': False,
             'playback_rate': 1.0,
-            'audio_output_device_id': None
+            'audio_output_device_id': None,
+            'ai_features': constants.AI_FEATURES_DEFAULT.copy()
         }
         self.settings = self.default_settings.copy()
         self.load_app_settings()

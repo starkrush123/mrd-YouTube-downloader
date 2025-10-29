@@ -1,6 +1,7 @@
 import sys
 import shutil
 import keyring
+from keyring.errors import PasswordDeleteError
 
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QComboBox, 
@@ -8,6 +9,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Signal, QStandardPaths
 from ui.dialogs.audio_output_dialog import AudioOutputDialog
+from utils.constants import AI_FEATURES_DEFAULT, AI_FEATURES_LABELS
 
 class SettingsDialog(QDialog):
     settings_changed = Signal(dict)
@@ -56,6 +58,26 @@ class SettingsDialog(QDialog):
         self.audio_output_button.clicked.connect(self.select_audio_output_device)
         general_group_layout.addWidget(self.audio_output_button, 2, 0, 1, 2)
         layout.addLayout(general_group_layout)
+
+        ai_section_label = QLabel("Kemampuan AI yang Diizinkan:")
+        ai_section_label.setWordWrap(True)
+        layout.addWidget(ai_section_label)
+
+        self.ai_feature_checkboxes = {}
+        ai_feature_layout = QVBoxLayout()
+        ai_feature_layout.setContentsMargins(0, 0, 0, 0)
+        ai_feature_layout.setSpacing(4)
+        feature_flags = self.current_settings.get('ai_features', {}) or {}
+        defaults = AI_FEATURES_DEFAULT.copy()
+        for feature_key, label_text in AI_FEATURES_LABELS.items():
+            checkbox = QCheckBox(label_text)
+            checkbox.setAccessibleName(f"Fitur AI: {label_text}")
+            checkbox.setToolTip(f"Aktifkan agar AI dapat menjalankan aksi '{label_text}'.")
+            checkbox.setChecked(bool(feature_flags.get(feature_key, defaults.get(feature_key, True))))
+            ai_feature_layout.addWidget(checkbox)
+            self.ai_feature_checkboxes[feature_key] = checkbox
+        ai_feature_layout.addStretch()
+        layout.addLayout(ai_feature_layout)
         
         search_results_label = QLabel("Jumlah Hasil Pencarian:")
         self.search_results_spinbox = QSpinBox()
@@ -134,7 +156,10 @@ class SettingsDialog(QDialog):
         if api_key:
             keyring.set_password("mrd-youtube-downloader", "gemini_api_key", api_key)
         else:
-            keyring.delete_password("mrd-youtube-downloader", "gemini_api_key")
+            try:
+                keyring.delete_password("mrd-youtube-downloader", "gemini_api_key")
+            except PasswordDeleteError:
+                pass
 
         self.current_settings['output_path'] = self.dir_line_edit.text()
         self.current_settings['theme'] = self.theme_combo.currentText()
@@ -147,7 +172,10 @@ class SettingsDialog(QDialog):
         self.current_settings['invert_playback_shortcuts'] = self.invert_playback_shortcuts_checkbox.isChecked()
         self.current_settings['search_result_double_click_action'] = self.double_click_action_combo.currentText()
         self.current_settings['use_parallel_download'] = self.parallel_download_checkbox.isChecked()
-        
+        ai_features = dict(AI_FEATURES_DEFAULT)
+        ai_features.update({key: checkbox.isChecked() for key, checkbox in self.ai_feature_checkboxes.items()})
+        self.current_settings['ai_features'] = ai_features
+
         self.settings_changed.emit(self.current_settings)
         self.accept()
 
