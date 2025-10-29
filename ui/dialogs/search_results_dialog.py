@@ -111,9 +111,8 @@ class SearchResultsDialog(QDialog):
         if self.result_type == "playlist_search_results":
             title = entry.get('title', 'Playlist Tanpa Judul')
             uploader = entry.get('uploader', entry.get('channel', 'N/A'))
-            item_count = str(entry.get('playlist_count', entry.get('item_count', 'N/A')))
             url = entry.get('webpage_url', entry.get('url'))
-            item_text = f"Judul Playlist: {title}\nChannel: {uploader} | Jumlah Video: {item_count}"
+            item_text = f"Judul Playlist: {title}\nChannel: {uploader}"
             list_item_data = {'url': url, 'title': title, 'type': 'playlist_meta'}
             item = QListWidgetItem(item_text)
         else: 

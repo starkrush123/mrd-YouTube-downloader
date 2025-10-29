@@ -112,7 +112,7 @@ class SearchThread(QThread):
             'quiet': True,
             'nocheckcertificate': True,
             'skip_download': True,
-            'extract_flat': 'in_playlist',
+            'extract_flat': True,
             'noplaylist': False,
             'ignoreerrors': True,
             'force_generic_extractor': True,
@@ -127,8 +127,9 @@ class SearchThread(QThread):
 
         raw_entries = []
         if isinstance(info, dict):
-            if info.get('entries'):
-                raw_entries = info['entries']
+            entries = info.get('entries')
+            if isinstance(entries, list):
+                raw_entries = entries
             elif info.get('_type') == 'playlist':
                 raw_entries = info.get('entries', [])
 
