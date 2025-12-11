@@ -1,6 +1,8 @@
+import shiboken6
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtCore import QUrl, QTimer
 from PySide6.QtMultimedia import QMediaPlayer, QMediaDevices
+from PySide6.QtMultimediaWidgets import QVideoWidget
 from threads.stream_thread import StreamInfoThread
 from ui.dialogs.progress_dialogs import OperationProgressDialog
 from ui.widgets.video_player_widget import VideoPlayerWidget
@@ -13,6 +15,13 @@ class PlayerHandler:
         self.set_audio_output_device()
         self.media_devices = QMediaDevices()
         self.media_devices.audioOutputsChanged.connect(self._handle_default_audio_output_changed)
+
+    def _get_cookie_params(self):
+        return {
+            'source': self.main_window.settings.get('cookie_source', 'none'),
+            'browser': self.main_window.settings.get('cookie_browser', 'chrome'),
+            'file': self.main_window.settings.get('cookie_file', '')
+        }
 
     def _handle_default_audio_output_changed(self):
         print("[_handle_default_audio_output_changed] Dipanggil. Memanggil set_audio_output_device untuk re-evaluasi.")
@@ -138,7 +147,9 @@ class PlayerHandler:
         if self.main_window.stream_info_thread and self.main_window.stream_info_thread.isRunning():
             self.main_window.stream_info_thread.terminate()
             self.main_window.stream_info_thread.wait()
-        self.main_window.stream_info_thread = StreamInfoThread(page_url, title_hint, play_video, self.main_window)
+            
+        cookie_params = self._get_cookie_params()
+        self.main_window.stream_info_thread = StreamInfoThread(page_url, title_hint, play_video, cookie_params, self.main_window)
         self.main_window.stream_info_thread.stream_url_ready.connect(self.start_playback_with_stream_url)
         self.main_window.stream_info_thread.stream_error.connect(self.handle_stream_info_error)
         self.main_window.stream_info_thread.finished.connect(self.main_window._on_any_thread_finished)
@@ -153,6 +164,12 @@ class PlayerHandler:
 
         self.main_window.current_video_title_for_window = title
         if play_video:
+            need_new_video_widget = (
+                self.main_window.video_widget is None
+                or not shiboken6.isValid(self.main_window.video_widget)
+            )
+            if need_new_video_widget:
+                self.main_window.video_widget = QVideoWidget()
             self.main_window.media_player.setVideoOutput(self.main_window.video_widget)
             if not self.main_window.video_player_widget:
                 self.main_window.video_player_widget = VideoPlayerWidget(self.main_window.media_player, self.main_window.video_widget, self.main_window, settings=self.main_window.settings)
@@ -221,6 +238,7 @@ class PlayerHandler:
 
     def close_player_view(self):
         self.stop_current_playback()
+        self.main_window.media_player.setVideoOutput(None)
         self.main_window.tab_widget.setCurrentWidget(self.main_window.main_view_widget)
         self.main_window.menuBar().show()
         self.main_window.tab_widget.tabBar().show()
@@ -239,6 +257,7 @@ class PlayerHandler:
                 self.main_window.tab_widget.removeTab(idx)
             self.main_window.video_player_widget.deleteLater()
             self.main_window.video_player_widget = None
+            self.main_window.video_widget = None
         
         if self.main_window.audio_player_widget:
             idx = self.main_window.tab_widget.indexOf(self.main_window.audio_player_widget)

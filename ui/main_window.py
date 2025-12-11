@@ -14,7 +14,6 @@ from PySide6.QtGui import (
     QKeySequence, QShortcut, QDesktopServices
 )
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
-from PySide6.QtMultimediaWidgets import QVideoWidget
 
 # Local imports
 from utils import constants
@@ -54,7 +53,7 @@ class MainWindow(MainWindowCore):
         self.audio_output = QAudioOutput(self)
         self.media_player.setAudioOutput(self.audio_output)
         
-        self.video_widget = QVideoWidget()
+        self.video_widget = None
         self.video_player_widget = None
         self.audio_player_widget = None
 

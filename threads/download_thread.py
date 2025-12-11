@@ -1,7 +1,11 @@
 import os
 import sys
+import re
+from copy import deepcopy
 import yt_dlp
 from PySide6.QtCore import QThread, Signal
+
+ANSI_ESCAPE_RE = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
 
 class DownloadThread(QThread):
     download_progress_signal = Signal(int, str, str)
@@ -10,13 +14,14 @@ class DownloadThread(QThread):
     download_finished_signal = Signal(bool, str, str)
     single_item_finished_signal = Signal(bool, str, str, int, int)
     batch_overall_finished_signal = Signal(bool, str, str)
-    def __init__(self, url_or_items, output_path, format_choice, embed_metadata, use_parallel_download, video_title_hint=None, is_batch=False, list_title_for_batch=None, parent=None):
+    def __init__(self, url_or_items, output_path, format_choice, embed_metadata, use_parallel_download, cookie_params=None, video_title_hint=None, is_batch=False, list_title_for_batch=None, parent=None):
         super().__init__(parent)
         self.url_or_items = url_or_items
         self.output_path = output_path
         self.format_choice = format_choice
         self.embed_metadata = embed_metadata
         self.use_parallel_download = use_parallel_download
+        self.cookie_params = cookie_params or {}
         self.current_video_title = video_title_hint or "Video"
         self._is_stopping = False
         self.is_batch = is_batch
@@ -25,6 +30,14 @@ class DownloadThread(QThread):
 
     def stop(self):
         self._is_stopping = True
+
+    @staticmethod
+    def _sanitize_error_message(raw_message):
+        if not raw_message:
+            return ""
+        cleaned = ANSI_ESCAPE_RE.sub("", raw_message)
+        cleaned = cleaned.replace("[0;31m", "").replace("[0m", "").strip()
+        return cleaned
 
     def _progress_hook(self, d):
         if self._is_stopping:
@@ -53,8 +66,61 @@ class DownloadThread(QThread):
         elif status_msg == 'finished': self.download_status_signal.emit(f"Konversi ke {target_format_name} ({pp_name}) selesai.")
         elif status_msg == 'error': self.download_status_signal.emit(f"Kesalahan saat konversi ({pp_name}).")
 
+    def _invoke_yt_dlp(self, options, item_url):
+        worker_opts = deepcopy(options)
+        with yt_dlp.YoutubeDL(worker_opts) as ydl:
+            if self._is_stopping:
+                raise InterruptedError("Dihentikan pengguna sebelum ydl.download()")
+            ydl.download([item_url])
+        if self._is_stopping:
+            raise InterruptedError("Dihentikan pengguna setelah ydl.download()")
+
+    def _perform_download_with_retry(self, base_opts, item_url):
+        try:
+            self._invoke_yt_dlp(base_opts, item_url)
+            return
+        except yt_dlp.utils.DownloadError as first_error:
+            cleaned_first = self._sanitize_error_message(str(first_error))
+            if "video unavailable" in cleaned_first.lower() and "youtube" in item_url.lower():
+                fallback_opts = deepcopy(base_opts)
+                fallback_opts.pop('downloader', None)
+                fallback_opts.pop('downloader_args', None)
+                fallback_args = fallback_opts.setdefault('extractor_args', {}).setdefault('youtube', {})
+                fallback_clients = fallback_args.get('player_client')
+                if isinstance(fallback_clients, list):
+                    combined = list({client for client in fallback_clients})
+                elif fallback_clients:
+                    combined = [fallback_clients]
+                else:
+                    combined = []
+                for client in ["android", "ios", "web", "mweb", "tv"]:
+                    if client not in combined:
+                        combined.append(client)
+                fallback_args['player_client'] = combined
+                fallback_opts['allow_unplayable_formats'] = True
+                fallback_opts['ignore_no_formats_error'] = True
+                self.download_status_signal.emit("Percobaan ulang dengan mode kompatibilitas YouTube...")
+                try:
+                    self._invoke_yt_dlp(fallback_opts, item_url)
+                    return
+                except yt_dlp.utils.DownloadError as second_error:
+                    raise second_error from first_error
+            raise first_error
+
     def download_single_item(self, item_url, item_title_hint, current_index=0, total_items=1):
         if self._is_stopping: raise InterruptedError("Dihentikan pengguna sebelum memulai item.")
+        
+        # Prepare Cookie Options
+        cookie_opts = {}
+        c_source = self.cookie_params.get('source', 'none')
+        if c_source == 'browser':
+            c_browser = self.cookie_params.get('browser', 'chrome')
+            cookie_opts['cookiesfrombrowser'] = (c_browser, None, None)
+        elif c_source == 'file':
+            c_file = self.cookie_params.get('file', '')
+            if c_file and os.path.exists(c_file):
+                cookie_opts['cookiefile'] = c_file
+
         actual_output_path = self.output_path
         if self.is_batch and self.list_title_for_batch:
             list_folder_name = yt_dlp.utils.sanitize_filename(self.list_title_for_batch, restricted=True)
@@ -66,7 +132,9 @@ class DownloadThread(QThread):
         try:
             current_title = item_title_hint
             if not current_title or current_title in ["Video", "URL dari Input", "Audio dari Input", "Video dari URL"]:
-                with yt_dlp.YoutubeDL({'quiet': True, 'nocheckcertificate': True, 'skip_download': True}) as ydl_info:
+                info_opts = {'quiet': True, 'nocheckcertificate': True, 'skip_download': True}
+                info_opts.update(cookie_opts)
+                with yt_dlp.YoutubeDL(info_opts) as ydl_info:
                     if self._is_stopping: raise InterruptedError("Dihentikan pengguna sebelum fetch info judul")
                     info = ydl_info.extract_info(item_url, download=False)
                     current_title = info.get('title', 'Video Tanpa Judul')
@@ -85,6 +153,7 @@ class DownloadThread(QThread):
                 'http_chunk_size': 5_242_880,
                 'outtmpl': os.path.join(actual_output_path, '%(title)s.%(ext)s')
             }
+            ydl_opts.update(cookie_opts)
             
             if self.use_parallel_download:
                 ydl_opts['downloader'] = 'aria2c'
@@ -133,10 +202,7 @@ class DownloadThread(QThread):
                 return True, status_msg, final_expected_filename_by_logic
             self.download_status_signal.emit(f"Mengunduh sebagai (target): {os.path.basename(final_expected_filename_by_logic)}")
             
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                if self._is_stopping: raise InterruptedError("Dihentikan pengguna sebelum ydl.download()")
-                ydl.download([item_url])
-            if self._is_stopping: raise InterruptedError("Dihentikan pengguna setelah ydl.download()")
+            self._perform_download_with_retry(ydl_opts, item_url)
             file_to_check = self.last_processed_filepath if self.last_processed_filepath else final_expected_filename_by_logic
             if os.path.exists(file_to_check):
                 success_msg = f"Selesai: {os.path.basename(file_to_check)}"
@@ -157,7 +223,15 @@ class DownloadThread(QThread):
                 else: self.download_finished_signal.emit(False, fail_msg, "")
                 return False, fail_msg, ""
         except InterruptedError as e: msg = f"Unduhan dihentikan: {str(e)}"
-        except yt_dlp.utils.DownloadError as e: msg = f"Kesalahan unduhan yt-dlp: {str(e).splitlines()[0] if str(e).splitlines() else str(e)}"
+        except yt_dlp.utils.DownloadError as e:
+            cleaned_err = self._sanitize_error_message(str(e))
+            if "Could not copy" in cleaned_err and "cookie" in cleaned_err:
+                msg = "Gagal akses cookies: Browser sedang terbuka/terkunci. Harap tutup browser sepenuhnya."
+            elif "Failed to decrypt" in cleaned_err or "DPAPI" in cleaned_err:
+                msg = "Gagal dekripsi cookies browser. Coba tutup browser atau gunakan metode File Cookies (.txt)."
+            else:
+                first_line = cleaned_err.splitlines()[0] if cleaned_err.splitlines() else cleaned_err
+                msg = f"Kesalahan unduhan yt-dlp: {first_line or 'Tidak diketahui'}"
         except Exception as e: msg = f"Kesalahan tak terduga saat unduh: {str(e)}"
         
         if self.is_batch: self.single_item_finished_signal.emit(False, msg, "", current_index, total_items)

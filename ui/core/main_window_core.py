@@ -71,7 +71,10 @@ class MainWindowCore(QMainWindow):
             'use_parallel_download': False,
             'playback_rate': 1.0,
             'audio_output_device_id': None,
-            'ai_features': constants.AI_FEATURES_DEFAULT.copy()
+            'ai_features': constants.AI_FEATURES_DEFAULT.copy(),
+            'cookie_source': 'none',
+            'cookie_browser': 'chrome',
+            'cookie_file': ''
         }
         self.settings = self.default_settings.copy()
         self.load_app_settings()

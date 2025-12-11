@@ -1,5 +1,6 @@
 import time
 import re
+import os
 import yt_dlp
 import traceback
 import urllib.parse
@@ -40,11 +41,12 @@ class SearchThread(QThread):
     results_batch_ready = Signal(list, str)
     search_finished = Signal(str, int)
     search_error = Signal(str)
-    def __init__(self, query, limit_count, search_type, parent=None):
+    def __init__(self, query, limit_count, search_type, cookie_params=None, parent=None):
         super().__init__(parent)
         self.query = query
         self.limit_count = limit_count
         self.search_type = search_type
+        self.cookie_params = cookie_params or {}
         
     def run(self):
         cache_key = (self.query.lower(), self.search_type, self.limit_count)
@@ -58,8 +60,21 @@ class SearchThread(QThread):
             return
         try:
             entries = []
+            
+            # Prepare Cookie Options
+            cookie_opts = {}
+            c_source = self.cookie_params.get('source', 'none')
+            if c_source == 'browser':
+                c_browser = self.cookie_params.get('browser', 'chrome')
+                cookie_opts['cookiesfrombrowser'] = (c_browser, None, None)
+            elif c_source == 'file':
+                c_file = self.cookie_params.get('file', '')
+                if c_file and os.path.exists(c_file):
+                    cookie_opts['cookiefile'] = c_file
+
             if self.search_type == "Video":
                 ydl_opts = {'quiet': True, 'nocheckcertificate': True, 'skip_download': True, 'extract_flat': True, 'noplaylist': True}
+                ydl_opts.update(cookie_opts)
                 search_query_yt = f"ytsearch{self.limit_count}:{self.query}"
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     result = ydl.extract_info(search_query_yt, download=False)
@@ -69,7 +84,7 @@ class SearchThread(QThread):
                 elif result and result.get('_type') == 'video':
                     entries = [result]
             elif self.search_type == "Playlist":
-                entries = self._search_playlists_direct(self.query, self.limit_count)
+                entries = self._search_playlists_direct(self.query, self.limit_count, cookie_opts)
             if entries:
                 dprint(f"Pencarian ditemukan {len(entries)} hasil untuk: {self.query}")
                 _store_in_cache(cache_key, entries)
@@ -91,6 +106,13 @@ class SearchThread(QThread):
                     
         except yt_dlp.utils.DownloadError as e:
             error_msg = str(e)
+            if "Could not copy" in error_msg and "cookie" in error_msg:
+                self.search_error.emit("Browser terkunci: Tutup browser Anda.")
+                return
+            elif "Failed to decrypt" in error_msg or "DPAPI" in error_msg:
+                self.search_error.emit("Gagal dekripsi cookies browser. Gunakan metode File Cookies.")
+                return
+
             msg = error_msg.split('\n')[-1] if '\n' in error_msg else error_msg
             if "Unsupported URL" in error_msg: self.search_error.emit(f"URL/format pencarian tidak didukung.")
             elif "Unable to extract video data" in error_msg: self.search_error.emit("Tidak dapat mengambil data.")
@@ -99,7 +121,7 @@ class SearchThread(QThread):
             dprint(f"Error di SearchThread: {traceback.format_exc()}")
             self.search_error.emit(f"Kesalahan tak terduga: {str(e)}")
 
-    def _search_playlists_direct(self, query, limit_count):
+    def _search_playlists_direct(self, query, limit_count, cookie_opts=None):
         try:
             max_results = max(1, int(limit_count))
         except (TypeError, ValueError):
@@ -117,6 +139,9 @@ class SearchThread(QThread):
             'ignoreerrors': True,
             'force_generic_extractor': True,
         }
+        if cookie_opts:
+            ydl_opts.update(cookie_opts)
+
         collected = []
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -178,12 +203,24 @@ class PlaylistFetchThread(QThread):
     results_ready = Signal(list, str, str)
     fetch_error = Signal(str)
     playlist_info_ready = Signal(dict)
-    def __init__(self, playlist_url, parent=None):
+    def __init__(self, playlist_url, cookie_params=None, parent=None):
         super().__init__(parent)
         self.playlist_url = playlist_url
+        self.cookie_params = cookie_params or {}
 
     def run(self):
         ydl_opts = {'quiet': True, 'nocheckcertificate': True, 'extract_flat': True, 'skip_download': True, 'ignoreerrors': True}
+        
+        # Apply Cookies
+        c_source = self.cookie_params.get('source', 'none')
+        if c_source == 'browser':
+            c_browser = self.cookie_params.get('browser', 'chrome')
+            ydl_opts['cookiesfrombrowser'] = (c_browser, None, None)
+        elif c_source == 'file':
+            c_file = self.cookie_params.get('file', '')
+            if c_file and os.path.exists(c_file):
+                ydl_opts['cookiefile'] = c_file
+
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 playlist_meta = ydl.extract_info(self.playlist_url, download=False, process=False, extra_info={'extract_flat': 'discard_in_playlist'})
@@ -207,6 +244,13 @@ class PlaylistFetchThread(QThread):
                 self.fetch_error.emit(f"Tidak dapat ambil item dari URL: '{self.playlist_url[:50]}...'.")
         except yt_dlp.utils.DownloadError as e:
             error_msg = str(e)
+            if "Could not copy" in error_msg and "cookie" in error_msg:
+                self.fetch_error.emit("Gagal akses playlist: Browser terkunci. Harap tutup browser.")
+                return
+            elif "Failed to decrypt" in error_msg or "DPAPI" in error_msg:
+                self.fetch_error.emit("Gagal dekripsi cookies browser. Gunakan metode File Cookies.")
+                return
+
             detailed_error = re.search(r'ERROR: (.*?)(?:;|$)', error_msg, re.DOTALL)
             msg = detailed_error.group(1).strip() if detailed_error else error_msg.split('\n')[0]
             if "Unsupported URL" in msg: self.fetch_error.emit(f"URL tidak didukung: {self.playlist_url[:50]}...")
@@ -220,15 +264,27 @@ class ChannelFetchThread(QThread):
     results_ready = Signal(list, str, str)
     fetch_error = Signal(str)
     
-    def __init__(self, channel_url, parent=None):
+    def __init__(self, channel_url, cookie_params=None, parent=None):
         super().__init__(parent)
         self.channel_url = channel_url
+        self.cookie_params = cookie_params or {}
         
     def run(self):
         ydl_opts = {
             'quiet': True, 'nocheckcertificate': True, 'extract_flat': False,
             'skip_download': True, 'ignoreerrors': True, 'playlistend': 100
         }
+        
+        # Apply Cookies
+        c_source = self.cookie_params.get('source', 'none')
+        if c_source == 'browser':
+            c_browser = self.cookie_params.get('browser', 'chrome')
+            ydl_opts['cookiesfrombrowser'] = (c_browser, None, None)
+        elif c_source == 'file':
+            c_file = self.cookie_params.get('file', '')
+            if c_file and os.path.exists(c_file):
+                ydl_opts['cookiefile'] = c_file
+
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 result = ydl.extract_info(self.channel_url, download=False)
@@ -246,6 +302,13 @@ class ChannelFetchThread(QThread):
                 self.fetch_error.emit(f"Tidak dapat mengambil video dari channel: '{self.channel_url[:50]}...'. Pastikan URL channel valid.")
         except yt_dlp.utils.DownloadError as e:
             error_msg = str(e)
+            if "Could not copy" in error_msg and "cookie" in error_msg:
+                self.fetch_error.emit("Gagal akses channel: Browser terkunci. Harap tutup browser.")
+                return
+            elif "Failed to decrypt" in error_msg or "DPAPI" in error_msg:
+                self.fetch_error.emit("Gagal dekripsi cookies browser. Gunakan metode File Cookies.")
+                return
+
             msg = re.search(r'ERROR: (.*?)(?:;|$)', error_msg, re.DOTALL)
             msg = msg.group(1).strip() if msg else error_msg.split('\n')[0]
             self.fetch_error.emit(f"Gagal mengambil info channel: {msg}")

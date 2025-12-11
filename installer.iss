@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "mrd YouTube downloader"
-#define MyAppVersion "1.5.0"
+#define MyAppVersion "1.6.0"
 #define MyAppPublisher "mrido1"
 #define MyAppExeName "MRD-YouTube-Downloader.exe"
 
@@ -28,7 +28,7 @@ DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 ;PrivilegesRequired=lowest
 OutputDir=D:\
-OutputBaseFilename=mrd-YouTube-downloader1.5.2
+OutputBaseFilename=mrd-YouTube-downloader1.6.0
 SolidCompression=yes
 WizardStyle=modern
 

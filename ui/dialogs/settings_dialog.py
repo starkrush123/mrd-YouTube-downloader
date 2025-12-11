@@ -5,7 +5,8 @@ from keyring.errors import PasswordDeleteError
 
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QComboBox, 
-    QLabel, QFileDialog, QDialogButtonBox, QGridLayout, QSpinBox, QCheckBox, QMessageBox
+    QLabel, QFileDialog, QDialogButtonBox, QGridLayout, QSpinBox, QCheckBox, QMessageBox,
+    QGroupBox
 )
 from PySide6.QtCore import Signal, QStandardPaths
 from ui.dialogs.audio_output_dialog import AudioOutputDialog
@@ -58,6 +59,54 @@ class SettingsDialog(QDialog):
         self.audio_output_button.clicked.connect(self.select_audio_output_device)
         general_group_layout.addWidget(self.audio_output_button, 2, 0, 1, 2)
         layout.addLayout(general_group_layout)
+
+        # Cookies Section
+        cookies_group = QGroupBox("Autentikasi YouTube (Cookies)")
+        cookies_layout = QGridLayout()
+        
+        cookies_source_label = QLabel("Sumber Cookies:")
+        self.cookies_source_combo = QComboBox()
+        # Mapping: 0=None, 1=Browser, 2=File
+        self.cookies_source_combo.addItems(["Tidak Ada", "Import dari Browser", "File Netscape Cookies (.txt)"])
+        
+        current_source = self.current_settings.get('cookie_source', 'none')
+        if current_source == 'browser':
+            self.cookies_source_combo.setCurrentIndex(1)
+        elif current_source == 'file':
+            self.cookies_source_combo.setCurrentIndex(2)
+        else:
+            self.cookies_source_combo.setCurrentIndex(0)
+            
+        cookies_source_label.setBuddy(self.cookies_source_combo)
+        
+        self.browser_label = QLabel("Browser:")
+        self.cookies_browser_combo = QComboBox()
+        self.cookies_browser_combo.addItems(["chrome", "firefox", "opera", "edge", "chromium", "brave", "vivaldi", "safari"])
+        self.cookies_browser_combo.setCurrentText(self.current_settings.get('cookie_browser', 'chrome'))
+        
+        self.cookie_file_label = QLabel("Path File Cookies:")
+        self.cookie_file_edit = QLineEdit(self.current_settings.get('cookie_file', ''))
+        self.cookie_file_edit.setReadOnly(True)
+        self.cookie_file_btn = QPushButton("Pilih File...")
+        self.cookie_file_btn.clicked.connect(self.select_cookie_file)
+        
+        cookies_layout.addWidget(cookies_source_label, 0, 0)
+        cookies_layout.addWidget(self.cookies_source_combo, 0, 1)
+        
+        cookies_layout.addWidget(self.browser_label, 1, 0)
+        cookies_layout.addWidget(self.cookies_browser_combo, 1, 1)
+        
+        cookies_layout.addWidget(self.cookie_file_label, 2, 0)
+        file_layout = QHBoxLayout()
+        file_layout.addWidget(self.cookie_file_edit)
+        file_layout.addWidget(self.cookie_file_btn)
+        cookies_layout.addLayout(file_layout, 2, 1)
+        
+        cookies_group.setLayout(cookies_layout)
+        layout.addWidget(cookies_group)
+        
+        self.cookies_source_combo.currentIndexChanged.connect(self.toggle_cookies_ui)
+        self.toggle_cookies_ui()
 
         ai_section_label = QLabel("Kemampuan AI yang Diizinkan:")
         ai_section_label.setWordWrap(True)
@@ -136,6 +185,24 @@ class SettingsDialog(QDialog):
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box)
 
+    def toggle_cookies_ui(self):
+        idx = self.cookies_source_combo.currentIndex()
+        # 0: None, 1: Browser, 2: File
+        is_browser = (idx == 1)
+        is_file = (idx == 2)
+        
+        self.browser_label.setVisible(is_browser)
+        self.cookies_browser_combo.setVisible(is_browser)
+        
+        self.cookie_file_label.setVisible(is_file)
+        self.cookie_file_edit.setVisible(is_file)
+        self.cookie_file_btn.setVisible(is_file)
+
+    def select_cookie_file(self):
+        path, _ = QFileDialog.getOpenFileName(self, "Pilih File Cookies", "", "Text Files (*.txt);;All Files (*)")
+        if path:
+            self.cookie_file_edit.setText(path)
+
     def on_parallel_download_toggled(self, checked):
         if checked:
             aria2c_executable = "aria2c.exe" if sys.platform == "win32" else "aria2c"
@@ -163,6 +230,19 @@ class SettingsDialog(QDialog):
 
         self.current_settings['output_path'] = self.dir_line_edit.text()
         self.current_settings['theme'] = self.theme_combo.currentText()
+        
+        # Save Cookies Settings
+        c_idx = self.cookies_source_combo.currentIndex()
+        if c_idx == 1:
+            self.current_settings['cookie_source'] = 'browser'
+        elif c_idx == 2:
+            self.current_settings['cookie_source'] = 'file'
+        else:
+            self.current_settings['cookie_source'] = 'none'
+            
+        self.current_settings['cookie_browser'] = self.cookies_browser_combo.currentText()
+        self.current_settings['cookie_file'] = self.cookie_file_edit.text()
+
         self.current_settings['monitor_clipboard'] = self.clipboard_monitor_checkbox.isChecked()
         self.current_settings['embed_metadata'] = self.embed_metadata_checkbox.isChecked()
         self.current_settings['video_format_choice'] = self.video_format_combo_box.currentText()

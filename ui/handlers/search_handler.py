@@ -8,6 +8,13 @@ class SearchHandler:
         self.main_window = main_window
         self.active_search_results_dialog = None
 
+    def _get_cookie_params(self):
+        return {
+            'source': self.main_window.settings.get('cookie_source', 'none'),
+            'browser': self.main_window.settings.get('cookie_browser', 'chrome'),
+            'file': self.main_window.settings.get('cookie_file', '')
+        }
+
     def process_input(self):
         txt = self.main_window.main_view_widget.input_line_edit.text().strip()
         if not txt:
@@ -51,7 +58,8 @@ class SearchHandler:
         self.main_window.operation_progress_dialog = OperationProgressDialog(f"Mencari {lbl}: {query[:30]}...", self.main_window)
         self.main_window.operation_progress_dialog.show()
 
-        self.main_window.search_thread = SearchThread(query, self.main_window.settings.get('search_results_count', 10), search_type, self.main_window)
+        cookie_params = self._get_cookie_params()
+        self.main_window.search_thread = SearchThread(query, self.main_window.settings.get('search_results_count', 10), search_type, cookie_params, self.main_window)
         self.main_window.search_thread.results_batch_ready.connect(self.handle_search_results_batch)
         self.main_window.search_thread.search_finished.connect(self.handle_search_finished)
         self.main_window.search_thread.search_error.connect(self.handle_search_error)
@@ -112,7 +120,9 @@ class SearchHandler:
         if self.main_window.operation_progress_dialog: self.main_window.operation_progress_dialog.close()
         self.main_window.operation_progress_dialog = OperationProgressDialog(f"Memuat Isi Playlist: {playlist_url[:40]}...", self.main_window)
         self.main_window.operation_progress_dialog.show()
-        self.main_window.playlist_fetch_thread = PlaylistFetchThread(playlist_url, parent=self.main_window)
+        
+        cookie_params = self._get_cookie_params()
+        self.main_window.playlist_fetch_thread = PlaylistFetchThread(playlist_url, cookie_params, parent=self.main_window)
         self.main_window.playlist_fetch_thread.results_ready.connect(self.handle_list_items_results)
         self.main_window.playlist_fetch_thread.fetch_error.connect(self.handle_list_fetch_error)
         self.main_window.playlist_fetch_thread.finished.connect(self.main_window._on_any_thread_finished)
@@ -132,7 +142,9 @@ class SearchHandler:
         if self.main_window.operation_progress_dialog: self.main_window.operation_progress_dialog.close()
         self.main_window.operation_progress_dialog = OperationProgressDialog(f"Memuat Channel: {channel_url_or_query[:40]}...", self.main_window)
         self.main_window.operation_progress_dialog.show()
-        self.main_window.channel_fetch_thread = ChannelFetchThread(channel_url_or_query, self.main_window)
+        
+        cookie_params = self._get_cookie_params()
+        self.main_window.channel_fetch_thread = ChannelFetchThread(channel_url_or_query, cookie_params, self.main_window)
         self.main_window.channel_fetch_thread.results_ready.connect(lambda e, t, u: self.handle_list_items_results(e, t, u, list_type='channel'))
         self.main_window.channel_fetch_thread.fetch_error.connect(self.handle_list_fetch_error)
         self.main_window.channel_fetch_thread.finished.connect(self.main_window._on_any_thread_finished)

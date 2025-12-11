@@ -10,6 +10,13 @@ class DownloadHandler:
     def __init__(self, main_window):
         self.main_window = main_window
 
+    def _get_cookie_params(self):
+        return {
+            'source': self.main_window.settings.get('cookie_source', 'none'),
+            'browser': self.main_window.settings.get('cookie_browser', 'chrome'),
+            'file': self.main_window.settings.get('cookie_file', '')
+        }
+
     def start_download(self, video_url, video_title_hint=None, download_type='video'):
         if any((t and t.isRunning()) for t in [self.main_window.search_thread, self.main_window.playlist_fetch_thread, self.main_window.channel_fetch_thread]):
             QMessageBox.information(self.main_window, "Operasi Berjalan", "Selesaikan atau hentikan operasi lain sebelum memulai unduhan.")
@@ -36,7 +43,8 @@ class DownloadHandler:
         self.main_window.set_status_text(f"Mulai unduh {download_type}: {video_title_hint or video_url[:50]}...")
         self.main_window.update_window_title_status(f"Mengunduh {download_type.capitalize()} ({ (video_title_hint or 'Media')[:20] }...)")
 
-        self.main_window.download_thread = DownloadThread(video_url, out_path, fmt_choice, embed_meta, use_parallel, video_title_hint, is_batch=False, parent=self.main_window)
+        cookie_params = self._get_cookie_params()
+        self.main_window.download_thread = DownloadThread(video_url, out_path, fmt_choice, embed_meta, use_parallel, cookie_params, video_title_hint, is_batch=False, parent=self.main_window)
         self.main_window.download_thread.download_title_signal.connect(self.main_window.download_progress_dialog.update_title)
         self.main_window.download_thread.download_progress_signal.connect(self.main_window.download_progress_dialog.update_progress)
         self.main_window.download_thread.download_status_signal.connect(self.main_window.download_progress_dialog.update_status)
@@ -82,7 +90,8 @@ class DownloadHandler:
         self.main_window.set_status_text(f"Mulai batch ({download_as_type_text}): {list_title} ({item_count} item)...")
         self.main_window.update_window_title_status(f"Batch Unduh ({download_as_type_text.capitalize()}) ({list_title[:20]}...)")
 
-        self.main_window.download_thread = DownloadThread(items_to_download, out_path, fmt_choice, embed_meta, use_parallel, None, True, list_title, self.main_window)
+        cookie_params = self._get_cookie_params()
+        self.main_window.download_thread = DownloadThread(items_to_download, out_path, fmt_choice, embed_meta, use_parallel, cookie_params, None, True, list_title, self.main_window)
         self.main_window.download_thread.download_title_signal.connect(self.main_window.download_progress_dialog.update_title)
         self.main_window.download_thread.download_progress_signal.connect(self.main_window.download_progress_dialog.update_progress)
         self.main_window.download_thread.download_status_signal.connect(self.main_window.download_progress_dialog.update_status)
