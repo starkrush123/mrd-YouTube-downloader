@@ -66,8 +66,26 @@ class DownloadThread(QThread):
         elif status_msg == 'finished': self.download_status_signal.emit(f"Konversi ke {target_format_name} ({pp_name}) selesai.")
         elif status_msg == 'error': self.download_status_signal.emit(f"Kesalahan saat konversi ({pp_name}).")
 
+    def _safe_deepcopy_opts(self, options):
+        hooks = {}
+        # Pop keys that cause pickle issues because they contain bound methods of QThread
+        keys_to_exclude = ['progress_hooks', 'postprocessor_hooks']
+        for key in keys_to_exclude:
+            if key in options:
+                hooks[key] = options.pop(key)
+        
+        try:
+            new_opts = deepcopy(options)
+        finally:
+            # Restore hooks to original options
+            options.update(hooks)
+        
+        # Add hooks to new copy
+        new_opts.update(hooks)
+        return new_opts
+
     def _invoke_yt_dlp(self, options, item_url):
-        worker_opts = deepcopy(options)
+        worker_opts = self._safe_deepcopy_opts(options)
         with yt_dlp.YoutubeDL(worker_opts) as ydl:
             if self._is_stopping:
                 raise InterruptedError("Dihentikan pengguna sebelum ydl.download()")
@@ -82,7 +100,7 @@ class DownloadThread(QThread):
         except yt_dlp.utils.DownloadError as first_error:
             cleaned_first = self._sanitize_error_message(str(first_error))
             if "video unavailable" in cleaned_first.lower() and "youtube" in item_url.lower():
-                fallback_opts = deepcopy(base_opts)
+                fallback_opts = self._safe_deepcopy_opts(base_opts)
                 fallback_opts.pop('downloader', None)
                 fallback_opts.pop('downloader_args', None)
                 fallback_args = fallback_opts.setdefault('extractor_args', {}).setdefault('youtube', {})
