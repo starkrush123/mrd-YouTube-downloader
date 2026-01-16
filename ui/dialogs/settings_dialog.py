@@ -168,9 +168,14 @@ class SettingsDialog(QDialog):
         
         self.invert_playback_shortcuts_checkbox = QCheckBox("Balik Shortcut Putar (Enter/Ctrl+Enter)")
         self.invert_playback_shortcuts_checkbox.setChecked(self.current_settings.get('invert_playback_shortcuts', False))
+        
+        self.auto_play_next_checkbox = QCheckBox("Otomatis putar item berikutnya")
+        self.auto_play_next_checkbox.setChecked(self.current_settings.get('auto_play_next', True))
+        
         actions_group_layout.addWidget(double_click_action_label, 0, 0)
         actions_group_layout.addWidget(self.double_click_action_combo, 0, 1)
         actions_group_layout.addWidget(self.invert_playback_shortcuts_checkbox, 1, 0, 1, 2)
+        actions_group_layout.addWidget(self.auto_play_next_checkbox, 2, 0, 1, 2)
         layout.addLayout(actions_group_layout)
         self.show_completion_popup_checkbox = QCheckBox("Tampilkan Notifikasi Selesai Unduh")
         self.show_completion_popup_checkbox.setChecked(self.current_settings.get('show_completion_popup', True))
@@ -250,6 +255,7 @@ class SettingsDialog(QDialog):
         self.current_settings['search_results_count'] = self.search_results_spinbox.value()
         self.current_settings['show_completion_popup'] = self.show_completion_popup_checkbox.isChecked()
         self.current_settings['invert_playback_shortcuts'] = self.invert_playback_shortcuts_checkbox.isChecked()
+        self.current_settings['auto_play_next'] = self.auto_play_next_checkbox.isChecked()
         self.current_settings['search_result_double_click_action'] = self.double_click_action_combo.currentText()
         self.current_settings['use_parallel_download'] = self.parallel_download_checkbox.isChecked()
         ai_features = dict(AI_FEATURES_DEFAULT)

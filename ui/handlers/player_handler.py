@@ -96,6 +96,23 @@ class PlayerHandler:
         if state == QMediaPlayer.PlaybackState.StoppedState:
             self.main_window.set_status_text("Playback berhenti/selesai.")
             self.main_window.update_window_title_status("Siap")
+            
+            # Auto-play next logic
+            should_autoplay = self.main_window.settings.get('auto_play_next', True)
+            media_status = self.main_window.media_player.mediaStatus()
+            
+            # Check if media finished (EndOfMedia) OR if it stopped at the end (LoadedMedia with position at duration)
+            # Sometimes Qt reports LoadedMedia instead of EndOfMedia when stopped manually or naturally
+            is_at_end = (media_status == QMediaPlayer.MediaStatus.EndOfMedia)
+            if not is_at_end and media_status == QMediaPlayer.MediaStatus.LoadedMedia:
+                if self.main_window.media_player.position() > 0 and \
+                   self.main_window.media_player.position() >= self.main_window.media_player.duration() - 1000: # tolerance 1s
+                    is_at_end = True
+
+            if should_autoplay and is_at_end:
+                 if self._try_play_next_item():
+                     return
+
             if self.main_window.tab_widget.currentWidget() != self.main_window.main_view_widget:
                 self.close_player_view()
             self.main_window.set_ui_busy_state(False, operation_type="playback")
@@ -265,3 +282,37 @@ class PlayerHandler:
                 self.main_window.tab_widget.removeTab(idx)
             self.main_window.audio_player_widget.deleteLater()
             self.main_window.audio_player_widget = None
+
+    def _try_play_next_item(self):
+        """Mencoba memutar item selanjutnya dari daftar hasil pencarian."""
+        current_url = self.main_window.last_selected_search_item_url
+        if not current_url:
+            return False
+            
+        results = self.main_window.search_results
+        if not results:
+            return False
+
+        current_index = -1
+        for i, item in enumerate(results):
+            if item.get('url') == current_url:
+                current_index = i
+                break
+        
+        if current_index != -1 and current_index + 1 < len(results):
+            next_item = results[current_index + 1]
+            next_url = next_item.get('url')
+            next_title = next_item.get('title', 'Video Berikutnya')
+            
+            # Determine play type (video/audio) based on current active widget
+            is_video_mode = (self.main_window.tab_widget.currentWidget() == self.main_window.video_player_widget)
+            
+            self.main_window.last_selected_search_item_url = next_url
+            self.request_stream_info_and_play(next_url, next_title, is_video_mode)
+            
+            msg = f"Memutar otomatis selanjutnya: {next_title}"
+            self.main_window.set_status_text(msg)
+            nvda_speak(msg)
+            return True
+            
+        return False

@@ -57,6 +57,8 @@ class MainWindow(MainWindowCore):
         self.video_player_widget = None
         self.audio_player_widget = None
 
+        self.search_results = []
+
         # Initialize refactored modules
         self.events = MainWindowEvents(self)
         self.update_manager = MainWindowUpdate(self)

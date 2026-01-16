@@ -45,6 +45,8 @@ class SearchHandler:
             self.main_window.search_thread.terminate()
             self.main_window.search_thread.wait()
 
+        self.main_window.search_results = []
+        
         if search_type == "Channel":
             self.start_channel_item_fetch(query)
             return
@@ -70,6 +72,9 @@ class SearchHandler:
         if self.main_window.operation_progress_dialog and self.main_window.operation_progress_dialog.isVisible():
             self.main_window.operation_progress_dialog.accept()
             self.main_window.operation_progress_dialog = None
+
+        if results:
+            self.main_window.search_results.extend(results)
 
         query_ctx = self.main_window.current_video_title_for_window
 
@@ -113,6 +118,9 @@ class SearchHandler:
         if self.main_window.playlist_fetch_thread and self.main_window.playlist_fetch_thread.isRunning():
             self.main_window.playlist_fetch_thread.terminate()
             self.main_window.playlist_fetch_thread.wait()
+        
+        self.main_window.search_results = []
+        
         self.main_window.set_ui_busy_state(True, "playlist_fetching")
         self.main_window.set_status_text(f"Memuat item dari playlist: {playlist_url[:50]}...")
         self.main_window.update_window_title_status(f"Memuat Isi Playlist ({playlist_url[:30]}...)")
@@ -135,6 +143,9 @@ class SearchHandler:
         if self.main_window.channel_fetch_thread and self.main_window.channel_fetch_thread.isRunning():
             self.main_window.channel_fetch_thread.terminate()
             self.main_window.channel_fetch_thread.wait()
+        
+        self.main_window.search_results = []
+        
         self.main_window.set_ui_busy_state(True, "channel_fetching")
         self.main_window.set_status_text(f"Memuat video dari channel: {channel_url_or_query[:50]}...")
         self.main_window.update_window_title_status(f"Memuat Channel ({channel_url_or_query[:30]}...)")
@@ -154,6 +165,9 @@ class SearchHandler:
         if self.main_window.operation_progress_dialog:
             self.main_window.operation_progress_dialog.accept()
             self.main_window.operation_progress_dialog = None
+        
+        self.main_window.search_results = entries
+        
         list_name = "Playlist" if list_type == 'playlist' else "Channel"
         item_name = "video" if list_type == 'channel' else "item"
         dialog_result_type = "channel_items" if list_type == 'channel' else "playlist_items"
