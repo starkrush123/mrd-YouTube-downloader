@@ -8,6 +8,7 @@ from ui.dialogs.progress_dialogs import OperationProgressDialog
 from ui.widgets.video_player_widget import VideoPlayerWidget
 from ui.widgets.audio_player_widget import AudioPlayerWidget
 from nvda_control import speak as nvda_speak
+from utils.helpers import dprint
 
 class PlayerHandler:
     def __init__(self, main_window):
@@ -24,14 +25,14 @@ class PlayerHandler:
         }
 
     def _handle_default_audio_output_changed(self):
-        print("[_handle_default_audio_output_changed] Dipanggil. Memanggil set_audio_output_device untuk re-evaluasi.")
+        dprint("[_handle_default_audio_output_changed] Dipanggil. Memanggil set_audio_output_device untuk re-evaluasi.")
         self.set_audio_output_device()
 
 
     def set_audio_output_device(self):
-        print("[set_audio_output_device] Dipanggil.")
+        dprint("[set_audio_output_device] Dipanggil.")
         device_id = self.main_window.settings.get('audio_output_device_id')
-        print(f"[set_audio_output_device] Device ID dari pengaturan: {device_id}")
+        dprint(f"[set_audio_output_device] Device ID dari pengaturan: {device_id}")
 
         was_playing = self.main_window.media_player.playbackState() == QMediaPlayer.PlaybackState.PlayingState
         if was_playing:
@@ -39,20 +40,20 @@ class PlayerHandler:
 
         target_device = None
         available_devices = QMediaDevices.audioOutputs()
-        print(f"[set_audio_output_device] Perangkat yang tersedia: {[d.description() for d in available_devices]}")
+        dprint(f"[set_audio_output_device] Perangkat yang tersedia: {[d.description() for d in available_devices]}")
 
         if device_id == "default" or device_id is None:
             target_device = QMediaDevices.defaultAudioOutput()
-            print(f"[set_audio_output_device] Target perangkat (default/None): {target_device.description() if target_device else 'None'}")
+            dprint(f"[set_audio_output_device] Target perangkat (default/None): {target_device.description() if target_device else 'None'}")
         else:
             # Try to find the saved device
             for device in available_devices:
                 if device.id() == device_id:
                     target_device = device
-                    print(f"[set_audio_output_device] Target perangkat (tersimpan): {target_device.description()}")
+                    dprint(f"[set_audio_output_device] Target perangkat (tersimpan): {target_device.description()}")
                     break
             if not target_device:
-                print("[set_audio_output_device] Perangkat tersimpan tidak ditemukan. Mencoba fallback ke default.")
+                dprint("[set_audio_output_device] Perangkat tersimpan tidak ditemukan. Mencoba fallback ke default.")
                 self.main_window.set_status_text("Perangkat audio tersimpan tidak ditemukan atau tidak valid, mencoba menggunakan default.")
                 # Fallback to default if saved device is not found
                 target_device = QMediaDevices.defaultAudioOutput()
@@ -62,7 +63,7 @@ class PlayerHandler:
         # Now, attempt to set the target_device and validate it
         if target_device and target_device in available_devices:
             self.main_window.audio_output.setDevice(target_device)
-            print(f"[set_audio_output_device] Berhasil mengatur perangkat ke: {target_device.description()}")
+            dprint(f"[set_audio_output_device] Berhasil mengatur perangkat ke: {target_device.description()}")
             self.main_window.set_status_text(f"Perangkat output audio diubah ke: {target_device.description()}")
         else:
             # If target_device is None or not in available_devices (meaning it's invalid/disconnected)
@@ -72,10 +73,10 @@ class PlayerHandler:
                 self.main_window.audio_output.setDevice(final_fallback_device)
                 self.main_window.settings['audio_output_device_id'] = "default"
                 self.main_window.save_app_settings(show_error=False)
-                print(f"[set_audio_output_device] Berhasil fallback ke perangkat default: {final_fallback_device.description()}")
+                dprint(f"[set_audio_output_device] Berhasil fallback ke perangkat default: {final_fallback_device.description()}")
                 self.main_window.set_status_text(f"Perangkat audio tersimpan tidak ditemukan atau tidak valid, menggunakan default: {final_fallback_device.description()}.")
             else:
-                print("[set_audio_output_device] Tidak dapat menemukan perangkat audio yang valid, bahkan perangkat default.")
+                dprint("[set_audio_output_device] Tidak dapat menemukan perangkat audio yang valid, bahkan perangkat default.")
                 self.main_window.set_status_text("Tidak dapat menemukan perangkat audio yang valid, bahkan perangkat default.")
         
         if was_playing:
@@ -109,9 +110,14 @@ class PlayerHandler:
                    self.main_window.media_player.position() >= self.main_window.media_player.duration() - 1000: # tolerance 1s
                     is_at_end = True
 
+            dprint(f"[AutoPlay] Stopped. Status: {media_status}, AtEnd: {is_at_end}, AutoPlaySetting: {should_autoplay}")
+
             if should_autoplay and is_at_end:
+                 dprint("[AutoPlay] Condition met. Attempting next item.")
                  if self._try_play_next_item():
                      return
+                 else:
+                     dprint("[AutoPlay] No next item found.")
 
             if self.main_window.tab_widget.currentWidget() != self.main_window.main_view_widget:
                 self.close_player_view()
@@ -287,10 +293,12 @@ class PlayerHandler:
         """Mencoba memutar item selanjutnya dari daftar hasil pencarian."""
         current_url = self.main_window.last_selected_search_item_url
         if not current_url:
+            dprint("[_try_play_next_item] No current URL.")
             return False
             
         results = self.main_window.search_results
         if not results:
+            dprint("[_try_play_next_item] No search results list.")
             return False
 
         current_index = -1
@@ -299,6 +307,8 @@ class PlayerHandler:
                 current_index = i
                 break
         
+        dprint(f"[_try_play_next_item] Current index: {current_index}/{len(results)}")
+
         if current_index != -1 and current_index + 1 < len(results):
             next_item = results[current_index + 1]
             next_url = next_item.get('url')
@@ -313,6 +323,7 @@ class PlayerHandler:
             msg = f"Memutar otomatis selanjutnya: {next_title}"
             self.main_window.set_status_text(msg)
             nvda_speak(msg)
+            dprint(f"[_try_play_next_item] Playing next: {next_title}")
             return True
             
         return False

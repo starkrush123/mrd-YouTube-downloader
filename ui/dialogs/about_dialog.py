@@ -66,7 +66,7 @@ class AboutDialog(QDialog):
         built_with_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
         layout.addWidget(built_with_label)
 
-        copyright_label = QLabel("© 2024-2025 mrido1")
+        copyright_label = QLabel("© 2024-2026 mrido1")
         copyright_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
         layout.addWidget(copyright_label)
 

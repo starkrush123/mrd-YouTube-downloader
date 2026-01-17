@@ -16,7 +16,7 @@ class StreamInfoThread(QThread):
             ydl_opts = {
                 'quiet': True, 
                 'nocheckcertificate': True, 
-                'format': 'best[ext=mp4][height<=?1080]/best[ext=mp4]/best' if self.play_video else 'bestaudio/best'
+                'format': 'best[protocol^=http][ext=mp4][height<=?1080]/best[protocol^=http][height<=?1080]/best[protocol^=http]' if self.play_video else 'bestaudio[protocol^=http]/bestaudio/best[protocol^=http]'
             }
             
             # Apply Cookie Options
@@ -35,7 +35,7 @@ class StreamInfoThread(QThread):
                 
             if not stream_url and 'formats' in info:
                 formats = sorted(
-                    [f for f in info['formats'] if f.get('url') and (
+                    [f for f in info['formats'] if f.get('url') and (f.get('protocol', '').startswith('http')) and (
                         (self.play_video and f.get('vcodec') != 'none') or \
                         (not self.play_video and f.get('acodec') != 'none' and f.get('vcodec') == 'none')
                     )],

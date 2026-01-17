@@ -8,14 +8,16 @@ def dprint(message):
     if is_debug_mode():
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         log_message = f"[{timestamp}] [DEBUG] {message}"
-        if getattr(sys, 'frozen', False):
-            try:
-                with open(LOG_FILE_PATH, 'a', encoding='utf-8') as f:
-                    f.write(log_message + "\n")
-            except Exception:
-                pass
-        else:
-            print(log_message, flush=True)
+        
+        # Always write to file if debug mode is on
+        try:
+            with open(LOG_FILE_PATH, 'a', encoding='utf-8') as f:
+                f.write(log_message + "\n")
+        except Exception:
+            pass
+            
+        # Also print to console
+        print(log_message, flush=True)
 
 class ErrorDialog(QDialog):
     def __init__(self, error_traceback, parent=None):

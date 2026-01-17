@@ -10,13 +10,13 @@ class MainWindowValidation:
         
     def is_youtube_channel_url(self, url_text):
         patterns = [
-            re.compile(r'https?://(?:www\.)?youtube\.com/(?:c/|channel/|user/|@)([a-zA-Z0-9_-]+)/?(?:videos|featured|playlists|community|about)?/?$'),
-            re.compile(r'https?://(?:www\.)?youtube\.com/(?:c/|channel/|user/|@)([a-zA-Z0-9_-]+)$')
+            re.compile(r'https?://(?:[a-zA-Z0-9-]+\.)?youtube\.com/(?:c/|channel/|user/|@)([a-zA-Z0-9_-]+)/?(?:videos|featured|playlists|community|about)?/?$'),
+            re.compile(r'https?://(?:[a-zA-Z0-9-]+\.)?youtube\.com/(?:c/|channel/|user/|@)([a-zA-Z0-9_-]+)$')
         ]
         return any(p.match(url_text) for p in patterns)
 
     def is_potential_playlist_url(self, url_text):
-        pat_playlist = re.compile(r'https?://(?:www\.)?youtube\.com/playlist\?list=([a-zA-Z0-9_-]+)')
+        pat_playlist = re.compile(r'https?://(?:[a-zA-Z0-9-]+\.)?youtube\.com/playlist\?list=([a-zA-Z0-9_-]+)')
         return bool(pat_playlist.match(url_text))
 
     def is_valid_youtube_video_url(self, url_text):
