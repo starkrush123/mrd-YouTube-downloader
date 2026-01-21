@@ -28,10 +28,11 @@ if __name__ == "__main__":
         if os.path.isdir(gst_plugin_path):
             os.environ['GST_PLUGIN_PATH'] = gst_plugin_path + os.pathsep + os.environ.get('GST_PLUGIN_PATH', '')
     
+    app = QApplication(sys.argv)
+    
     if NVDA_CONTROL_AVAILABLE:
         nvda_connect()
 
-    app = QApplication(sys.argv)
     icon_path = os.path.join(script_dir, "youtube_downloader_icon.ico")
     if os.path.exists(icon_path):
         app.setWindowIcon(QIcon(icon_path))

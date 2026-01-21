@@ -135,3 +135,4 @@ cython_debug/
 errors.txt
 ChangeLog.md
 docs/
+build_nuitka.bats

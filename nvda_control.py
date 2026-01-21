@@ -246,8 +246,4 @@ def is_active() -> bool:
         return bool(_tolk_dll.Tolk_DetectScreenReader())
     return False
 
-# Initialize on module load attempt
-try:
-    _init_tolk()
-except:
-    pass
+

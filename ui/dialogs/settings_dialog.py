@@ -6,7 +6,7 @@ from keyring.errors import PasswordDeleteError
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QComboBox, 
     QLabel, QFileDialog, QDialogButtonBox, QGridLayout, QSpinBox, QCheckBox, QMessageBox,
-    QGroupBox
+    QGroupBox, QTabWidget, QWidget, QFormLayout
 )
 from PySide6.QtCore import Signal, QStandardPaths
 from ui.dialogs.audio_output_dialog import AudioOutputDialog
@@ -14,61 +14,157 @@ from utils.constants import AI_FEATURES_DEFAULT, AI_FEATURES_LABELS
 
 class SettingsDialog(QDialog):
     settings_changed = Signal(dict)
+
     def __init__(self, current_settings, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Pengaturan Aplikasi")
-        self.setMinimumWidth(550)
+        self.setMinimumWidth(600)
+        self.setMinimumHeight(500)
         self.current_settings = current_settings.copy()
-        layout = QVBoxLayout(self)
-        dir_label = QLabel("Simpan ke:")
+
+        # Main Layout
+        main_layout = QVBoxLayout(self)
+
+        # Tab Widget
+        self.tab_widget = QTabWidget()
+        main_layout.addWidget(self.tab_widget)
+
+        # Initialize Tabs
+        self.init_general_tab()
+        self.init_download_format_tab()
+        self.init_playback_tab()
+        self.init_account_ai_tab()
+
+        # Dialog Buttons (OK/Cancel)
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        button_box.accepted.connect(self.accept_settings)
+        button_box.rejected.connect(self.reject)
+        main_layout.addWidget(button_box)
+        
+        # Initial UI State updates
+        self.toggle_cookies_ui()
+
+    def init_general_tab(self):
+        tab = QWidget()
+        layout = QFormLayout(tab)
+        layout.setLabelAlignment(sys.modules['PySide6.QtCore'].Qt.AlignmentFlag.AlignRight)
+
+        # Output Directory
         default_output_path = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.MusicLocation)
+        path_layout = QHBoxLayout()
         self.dir_line_edit = QLineEdit(self.current_settings.get('output_path', default_output_path))
         self.dir_line_edit.setReadOnly(True)
-        dir_label.setBuddy(self.dir_line_edit)
         select_dir_button = QPushButton("Pilih Folder...")
         select_dir_button.clicked.connect(self.select_output_directory)
+        path_layout.addWidget(self.dir_line_edit)
+        path_layout.addWidget(select_dir_button)
         
-        dir_layout = QHBoxLayout()
-        dir_layout.addWidget(dir_label)
-        dir_layout.addWidget(self.dir_line_edit)
-        dir_layout.addWidget(select_dir_button)
-        layout.addLayout(dir_layout)
-        general_group_layout = QGridLayout()
-        theme_label = QLabel("Tema Aplikasi:")
+        dir_label = QLabel("Simpan ke:")
+        dir_label.setBuddy(self.dir_line_edit)
+        layout.addRow(dir_label, path_layout)
+
+        # Theme
         self.theme_combo = QComboBox()
         self.theme_combo.addItems(["Light", "Dark"])
         self.theme_combo.setCurrentText(self.current_settings.get('theme', "Light"))
+        theme_label = QLabel("Tema Aplikasi:")
         theme_label.setBuddy(self.theme_combo)
-        general_group_layout.addWidget(theme_label, 0, 0)
-        general_group_layout.addWidget(self.theme_combo, 0, 1)
-        self.clipboard_monitor_checkbox = QCheckBox("Pantau Clipboard untuk URL YouTube")
-        self.clipboard_monitor_checkbox.setChecked(self.current_settings.get('monitor_clipboard', True))
-        general_group_layout.addWidget(self.clipboard_monitor_checkbox, 1, 0, 1, 2)
+        layout.addRow(theme_label, self.theme_combo)
 
-        gemini_api_key_label = QLabel("Kunci API Gemini:")
-        
-        # Load API key from keyring
-        gemini_api_key = keyring.get_password("mrd-youtube-downloader", "gemini_api_key")
-        self.gemini_api_key_line_edit = QLineEdit(gemini_api_key if gemini_api_key else '')
-        
-        gemini_api_key_label.setBuddy(self.gemini_api_key_line_edit)
-        general_group_layout.addWidget(gemini_api_key_label, 3, 0)
-        general_group_layout.addWidget(self.gemini_api_key_line_edit, 3, 1)
-
+        # Audio Output
         self.audio_output_button = QPushButton("Pilih Perangkat Output Audio")
         self.audio_output_button.clicked.connect(self.select_audio_output_device)
-        general_group_layout.addWidget(self.audio_output_button, 2, 0, 1, 2)
-        layout.addLayout(general_group_layout)
+        layout.addRow("Audio Output:", self.audio_output_button)
 
-        # Cookies Section
+        # Clipboard Monitor
+        self.clipboard_monitor_checkbox = QCheckBox("Pantau Clipboard untuk URL YouTube")
+        self.clipboard_monitor_checkbox.setChecked(self.current_settings.get('monitor_clipboard', True))
+        layout.addRow(self.clipboard_monitor_checkbox)
+
+        # Completion Popup
+        self.show_completion_popup_checkbox = QCheckBox("Tampilkan Notifikasi Selesai Unduh")
+        self.show_completion_popup_checkbox.setChecked(self.current_settings.get('show_completion_popup', True))
+        layout.addRow(self.show_completion_popup_checkbox)
+
+        self.tab_widget.addTab(tab, "&Umum")
+
+    def init_download_format_tab(self):
+        tab = QWidget()
+        layout = QFormLayout(tab)
+
+        # Video Format
+        self.video_format_combo_box = QComboBox()
+        self.video_format_combo_box.addItems(["Video (MP4 - Kualitas Terbaik)", "Video (MKV - Kualitas Terbaik)", "Video (WEBM - Kualitas Terbaik)", "Video (AVI - Kompatibilitas)"])
+        self.video_format_combo_box.setCurrentText(self.current_settings.get('video_format_choice', "Video (MP4 - Kualitas Terbaik)"))
+        v_label = QLabel("Format Video Default:")
+        v_label.setBuddy(self.video_format_combo_box)
+        layout.addRow(v_label, self.video_format_combo_box)
+
+        # Audio Format
+        self.audio_format_combo_box = QComboBox()
+        self.audio_format_combo_box.addItems(["Audio (MP3 - Kualitas Terbaik)", "Audio (WAV - Tanpa Kompresi)", "Audio (AAC - Kualitas Baik)", "Audio (OGG Vorbis - Open Source)", "Audio (FLAC - Lossless)"])
+        self.audio_format_combo_box.setCurrentText(self.current_settings.get('audio_format_choice', "Audio (MP3 - Kualitas Terbaik)"))
+        a_label = QLabel("Format Audio Default:")
+        a_label.setBuddy(self.audio_format_combo_box)
+        layout.addRow(a_label, self.audio_format_combo_box)
+
+        # Embed Metadata
+        self.embed_metadata_checkbox = QCheckBox("Sematkan Thumbnail & Metadata (Audio)")
+        self.embed_metadata_checkbox.setChecked(self.current_settings.get('embed_metadata', True))
+        layout.addRow(self.embed_metadata_checkbox)
+
+        # Parallel Download
+        self.parallel_download_checkbox = QCheckBox("Gunakan akselerasi pararel (aria2c)")
+        self.parallel_download_checkbox.setToolTip("Dapat mempercepat unduhan secara signifikan. Membutuhkan aria2c.")
+        self.parallel_download_checkbox.setChecked(self.current_settings.get('use_parallel_download', False))
+        self.parallel_download_checkbox.toggled.connect(self.on_parallel_download_toggled)
+        layout.addRow(self.parallel_download_checkbox)
+
+        # Search Results
+        self.search_results_spinbox = QSpinBox()
+        self.search_results_spinbox.setRange(1, 50)
+        self.search_results_spinbox.setValue(self.current_settings.get('search_results_count', 10))
+        s_label = QLabel("Jumlah Hasil Pencarian:")
+        s_label.setBuddy(self.search_results_spinbox)
+        layout.addRow(s_label, self.search_results_spinbox)
+
+        # Double Click Action
+        self.double_click_action_combo = QComboBox()
+        self.double_click_action_combo.addItems(["Unduh Video", "Putar Audio", "Putar Video"])
+        self.double_click_action_combo.setCurrentText(self.current_settings.get('search_result_double_click_action', "Unduh Video"))
+        dc_label = QLabel("Aksi Dobel Klik:")
+        dc_label.setBuddy(self.double_click_action_combo)
+        layout.addRow(dc_label, self.double_click_action_combo)
+
+        self.tab_widget.addTab(tab, "&Unduhan")
+
+    def init_playback_tab(self):
+        tab = QWidget()
+        layout = QFormLayout(tab)
+
+        # Invert Shortcuts
+        self.invert_playback_shortcuts_checkbox = QCheckBox("Balik Shortcut Putar (Enter / Ctrl+Enter)")
+        self.invert_playback_shortcuts_checkbox.setChecked(self.current_settings.get('invert_playback_shortcuts', False))
+        self.invert_playback_shortcuts_checkbox.setToolTip("Jika aktif, Enter untuk memutar video dan Ctrl+Enter untuk memutar audio.")
+        layout.addRow(self.invert_playback_shortcuts_checkbox)
+
+        # Auto Play Next
+        self.auto_play_next_checkbox = QCheckBox("Otomatis putar item berikutnya")
+        self.auto_play_next_checkbox.setChecked(self.current_settings.get('auto_play_next', True))
+        layout.addRow(self.auto_play_next_checkbox)
+
+        self.tab_widget.addTab(tab, "&Pintasan")
+
+    def init_account_ai_tab(self):
+        tab = QWidget()
+        main_layout = QVBoxLayout(tab)
+
+        # Cookies Group
         cookies_group = QGroupBox("Autentikasi YouTube (Cookies)")
-        cookies_layout = QGridLayout()
+        cookies_layout = QFormLayout()
         
-        cookies_source_label = QLabel("Sumber Cookies:")
         self.cookies_source_combo = QComboBox()
-        # Mapping: 0=None, 1=Browser, 2=File
         self.cookies_source_combo.addItems(["Tidak Ada", "Import dari Browser", "File Netscape Cookies (.txt)"])
-        
         current_source = self.current_settings.get('cookie_source', 'none')
         if current_source == 'browser':
             self.cookies_source_combo.setCurrentIndex(1)
@@ -76,119 +172,61 @@ class SettingsDialog(QDialog):
             self.cookies_source_combo.setCurrentIndex(2)
         else:
             self.cookies_source_combo.setCurrentIndex(0)
-            
-        cookies_source_label.setBuddy(self.cookies_source_combo)
-        
+        self.cookies_source_combo.currentIndexChanged.connect(self.toggle_cookies_ui)
+        c_label = QLabel("Sumber Cookies:")
+        c_label.setBuddy(self.cookies_source_combo)
+        cookies_layout.addRow(c_label, self.cookies_source_combo)
+
         self.browser_label = QLabel("Browser:")
         self.cookies_browser_combo = QComboBox()
         self.cookies_browser_combo.addItems(["chrome", "firefox", "opera", "edge", "chromium", "brave", "vivaldi", "safari"])
         self.cookies_browser_combo.setCurrentText(self.current_settings.get('cookie_browser', 'chrome'))
-        
-        self.cookie_file_label = QLabel("Path File Cookies:")
+        self.browser_label.setBuddy(self.cookies_browser_combo)
+        cookies_layout.addRow(self.browser_label, self.cookies_browser_combo)
+
+        self.cookie_file_label = QLabel("Path File:")
+        file_layout = QHBoxLayout()
         self.cookie_file_edit = QLineEdit(self.current_settings.get('cookie_file', ''))
         self.cookie_file_edit.setReadOnly(True)
-        self.cookie_file_btn = QPushButton("Pilih File...")
+        self.cookie_file_btn = QPushButton("Pilih...")
         self.cookie_file_btn.clicked.connect(self.select_cookie_file)
-        
-        cookies_layout.addWidget(cookies_source_label, 0, 0)
-        cookies_layout.addWidget(self.cookies_source_combo, 0, 1)
-        
-        cookies_layout.addWidget(self.browser_label, 1, 0)
-        cookies_layout.addWidget(self.cookies_browser_combo, 1, 1)
-        
-        cookies_layout.addWidget(self.cookie_file_label, 2, 0)
-        file_layout = QHBoxLayout()
         file_layout.addWidget(self.cookie_file_edit)
         file_layout.addWidget(self.cookie_file_btn)
-        cookies_layout.addLayout(file_layout, 2, 1)
-        
+        self.cookie_file_label.setBuddy(self.cookie_file_edit)
+        cookies_layout.addRow(self.cookie_file_label, file_layout)
+
         cookies_group.setLayout(cookies_layout)
-        layout.addWidget(cookies_group)
-        
-        self.cookies_source_combo.currentIndexChanged.connect(self.toggle_cookies_ui)
-        self.toggle_cookies_ui()
+        main_layout.addWidget(cookies_group)
 
-        ai_section_label = QLabel("Kemampuan AI yang Diizinkan:")
-        ai_section_label.setWordWrap(True)
-        layout.addWidget(ai_section_label)
+        # Gemini API
+        gemini_layout = QFormLayout()
+        gemini_api_key = keyring.get_password("mrd-youtube-downloader", "gemini_api_key")
+        self.gemini_api_key_line_edit = QLineEdit(gemini_api_key if gemini_api_key else '')
+        self.gemini_api_key_line_edit.setEchoMode(QLineEdit.EchoMode.Password) # Security best practice
+        g_label = QLabel("Kunci API Gemini:")
+        g_label.setBuddy(self.gemini_api_key_line_edit)
+        gemini_layout.addRow(g_label, self.gemini_api_key_line_edit)
+        main_layout.addLayout(gemini_layout)
 
+        # AI Features Group
+        ai_group = QGroupBox("Kemampuan AI")
+        ai_layout = QVBoxLayout()
         self.ai_feature_checkboxes = {}
-        ai_feature_layout = QVBoxLayout()
-        ai_feature_layout.setContentsMargins(0, 0, 0, 0)
-        ai_feature_layout.setSpacing(4)
         feature_flags = self.current_settings.get('ai_features', {}) or {}
         defaults = AI_FEATURES_DEFAULT.copy()
+        
         for feature_key, label_text in AI_FEATURES_LABELS.items():
             checkbox = QCheckBox(label_text)
             checkbox.setAccessibleName(f"Fitur AI: {label_text}")
-            checkbox.setToolTip(f"Aktifkan agar AI dapat menjalankan aksi '{label_text}'.")
             checkbox.setChecked(bool(feature_flags.get(feature_key, defaults.get(feature_key, True))))
-            ai_feature_layout.addWidget(checkbox)
+            ai_layout.addWidget(checkbox)
             self.ai_feature_checkboxes[feature_key] = checkbox
-        ai_feature_layout.addStretch()
-        layout.addLayout(ai_feature_layout)
-        
-        search_results_label = QLabel("Jumlah Hasil Pencarian:")
-        self.search_results_spinbox = QSpinBox()
-        self.search_results_spinbox.setRange(1, 50)
-        self.search_results_spinbox.setValue(self.current_settings.get('search_results_count', 10))
-        search_results_label.setBuddy(self.search_results_spinbox)
-        search_layout = QHBoxLayout()
-        search_layout.addWidget(search_results_label)
-        search_layout.addWidget(self.search_results_spinbox)
-        layout.addLayout(search_layout)
-        format_group_layout = QGridLayout()
-        video_format_label = QLabel("Format Video Default:")
-        self.video_format_combo_box = QComboBox()
-        self.video_format_combo_box.addItems(["Video (MP4 - Kualitas Terbaik)", "Video (MKV - Kualitas Terbaik)", "Video (WEBM - Kualitas Terbaik)", "Video (AVI - Kompatibilitas)"])
-        self.video_format_combo_box.setCurrentText(self.current_settings.get('video_format_choice', "Video (MP4 - Kualitas Terbaik)"))
-        video_format_label.setBuddy(self.video_format_combo_box)
-        
-        audio_format_label = QLabel("Format Audio Default:")
-        self.audio_format_combo_box = QComboBox()
-        self.audio_format_combo_box.addItems(["Audio (MP3 - Kualitas Terbaik)", "Audio (WAV - Tanpa Kompresi)", "Audio (AAC - Kualitas Baik)", "Audio (OGG Vorbis - Open Source)", "Audio (FLAC - Lossless)"])
-        self.audio_format_combo_box.setCurrentText(self.current_settings.get('audio_format_choice', "Audio (MP3 - Kualitas Terbaik)"))
-        audio_format_label.setBuddy(self.audio_format_combo_box)
-        
-        self.embed_metadata_checkbox = QCheckBox("Sematkan Thumbnail & Metadata (untuk Audio)")
-        self.embed_metadata_checkbox.setChecked(self.current_settings.get('embed_metadata', True))
-        
-        format_group_layout.addWidget(video_format_label, 0, 0)
-        format_group_layout.addWidget(self.video_format_combo_box, 0, 1)
-        format_group_layout.addWidget(audio_format_label, 1, 0)
-        format_group_layout.addWidget(self.audio_format_combo_box, 1, 1)
-        format_group_layout.addWidget(self.embed_metadata_checkbox, 2, 0, 1, 2)
-        layout.addLayout(format_group_layout)
-        actions_group_layout = QGridLayout()
-        double_click_action_label = QLabel("Aksi Dobel Klik (Video):")
-        self.double_click_action_combo = QComboBox()
-        self.double_click_action_combo.addItems(["Unduh Video", "Putar Audio", "Putar Video"])
-        self.double_click_action_combo.setCurrentText(self.current_settings.get('search_result_double_click_action', "Unduh Video"))
-        double_click_action_label.setBuddy(self.double_click_action_combo)
-        
-        self.invert_playback_shortcuts_checkbox = QCheckBox("Balik Shortcut Putar (Enter/Ctrl+Enter)")
-        self.invert_playback_shortcuts_checkbox.setChecked(self.current_settings.get('invert_playback_shortcuts', False))
-        
-        self.auto_play_next_checkbox = QCheckBox("Otomatis putar item berikutnya")
-        self.auto_play_next_checkbox.setChecked(self.current_settings.get('auto_play_next', True))
-        
-        actions_group_layout.addWidget(double_click_action_label, 0, 0)
-        actions_group_layout.addWidget(self.double_click_action_combo, 0, 1)
-        actions_group_layout.addWidget(self.invert_playback_shortcuts_checkbox, 1, 0, 1, 2)
-        actions_group_layout.addWidget(self.auto_play_next_checkbox, 2, 0, 1, 2)
-        layout.addLayout(actions_group_layout)
-        self.show_completion_popup_checkbox = QCheckBox("Tampilkan Notifikasi Selesai Unduh")
-        self.show_completion_popup_checkbox.setChecked(self.current_settings.get('show_completion_popup', True))
-        layout.addWidget(self.show_completion_popup_checkbox)
-        self.parallel_download_checkbox = QCheckBox("Gunakan akselerasi pararel (beta)")
-        self.parallel_download_checkbox.setToolTip("Dapat mempercepat unduhan secara signifikan.")
-        self.parallel_download_checkbox.setChecked(self.current_settings.get('use_parallel_download', False))
-        self.parallel_download_checkbox.toggled.connect(self.on_parallel_download_toggled)
-        layout.addWidget(self.parallel_download_checkbox)
-        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
-        button_box.accepted.connect(self.accept_settings)
-        button_box.rejected.connect(self.reject)
-        layout.addWidget(button_box)
+            
+        ai_group.setLayout(ai_layout)
+        main_layout.addWidget(ai_group)
+        main_layout.addStretch()
+
+        self.tab_widget.addTab(tab, "&Akun && AI")
 
     def toggle_cookies_ui(self):
         idx = self.cookies_source_combo.currentIndex()
@@ -212,7 +250,7 @@ class SettingsDialog(QDialog):
         if checked:
             aria2c_executable = "aria2c.exe" if sys.platform == "win32" else "aria2c"
             if not shutil.which(aria2c_executable):
-                QMessageBox.warning(self, "gagal mengaktifkan fitur", "aria2c.exe nggak ketemu")
+                QMessageBox.warning(self, "Komponen Tidak Ditemukan", "aria2c tidak ditemukan di sistem. Fitur ini dimatikan.")
                 self.parallel_download_checkbox.blockSignals(True)
                 self.parallel_download_checkbox.setChecked(False)
                 self.parallel_download_checkbox.blockSignals(False)
