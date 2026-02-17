@@ -4,6 +4,7 @@ import re
 from copy import deepcopy
 import yt_dlp
 from PySide6.QtCore import QThread, Signal
+from utils.helpers import get_js_runtime_options
 
 ANSI_ESCAPE_RE = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
 
@@ -97,32 +98,26 @@ class DownloadThread(QThread):
         try:
             self._invoke_yt_dlp(base_opts, item_url)
             return
-        except yt_dlp.utils.DownloadError as first_error:
+        except (yt_dlp.utils.DownloadError, Exception) as first_error:
             cleaned_first = self._sanitize_error_message(str(first_error))
-            if "video unavailable" in cleaned_first.lower() and "youtube" in item_url.lower():
+            if ("video unavailable" in cleaned_first.lower() or "empty" in cleaned_first.lower() or "signature" in cleaned_first.lower() or "403" in cleaned_first or "no video formats" in cleaned_first.lower()) and "youtube" in item_url.lower():
                 fallback_opts = self._safe_deepcopy_opts(base_opts)
                 fallback_opts.pop('downloader', None)
                 fallback_opts.pop('downloader_args', None)
                 fallback_args = fallback_opts.setdefault('extractor_args', {}).setdefault('youtube', {})
-                fallback_clients = fallback_args.get('player_client')
-                if isinstance(fallback_clients, list):
-                    combined = list({client for client in fallback_clients})
-                elif fallback_clients:
-                    combined = [fallback_clients]
-                else:
-                    combined = []
-                for client in ["android", "ios", "web", "mweb", "tv"]:
-                    if client not in combined:
-                        combined.append(client)
-                fallback_args['player_client'] = combined
+                # Ensure we try robust clients in fallback
+                fallback_args['player_client'] = ['android', 'ios', 'web']
                 fallback_opts['allow_unplayable_formats'] = True
                 fallback_opts['ignore_no_formats_error'] = True
-                self.download_status_signal.emit("Percobaan ulang dengan mode kompatibilitas YouTube...")
+                self.download_status_signal.emit("Percobaan ulang dengan mode kompatibilitas YouTube (Android/iOS)...")
                 try:
                     self._invoke_yt_dlp(fallback_opts, item_url)
                     return
-                except yt_dlp.utils.DownloadError as second_error:
-                    raise second_error from first_error
+                except Exception as second_error:
+                    # Log the second error but raise the first one to keep original context if needed, 
+                    # or better, raise a combined message
+                    print(f"Retry failed: {second_error}")
+                    raise first_error
             raise first_error
 
     def download_single_item(self, item_url, item_title_hint, current_index=0, total_items=1):
@@ -152,6 +147,7 @@ class DownloadThread(QThread):
             if not current_title or current_title in ["Video", "URL dari Input", "Audio dari Input", "Video dari URL"]:
                 info_opts = {'quiet': True, 'nocheckcertificate': True, 'skip_download': True}
                 info_opts.update(cookie_opts)
+                info_opts.update(get_js_runtime_options())
                 with yt_dlp.YoutubeDL(info_opts) as ydl_info:
                     if self._is_stopping: raise InterruptedError("Dihentikan pengguna sebelum fetch info judul")
                     info = ydl_info.extract_info(item_url, download=False)
@@ -172,7 +168,12 @@ class DownloadThread(QThread):
                 'outtmpl': os.path.join(actual_output_path, '%(title)s.%(ext)s')
             }
             ydl_opts.update(cookie_opts)
+            ydl_opts.update(get_js_runtime_options())
             
+            # FORCE ANDROID/IOS CLIENT to bypass signature/JS issues and avoid need for ffmpeg merge (often provides progressive mp4)
+            if "youtube" in item_url.lower() or "youtu.be" in item_url.lower():
+                ydl_opts.setdefault('extractor_args', {}).setdefault('youtube', {})['player_client'] = ['android', 'ios']
+
             if self.use_parallel_download:
                 ydl_opts['downloader'] = 'aria2c'
                 ydl_opts['downloader_args'] = '-c -x 4 -s 4 -k 1M'
@@ -181,22 +182,33 @@ class DownloadThread(QThread):
             expected_ext = None
             is_audio_download = any(f in self.format_choice for f in ["MP3", "WAV", "AAC", "OGG Vorbis", "FLAC"])
             if not is_audio_download:
-                if "MP4" in self.format_choice:
-                    expected_ext = "mp4"
-                    ydl_opts['format'] = 'bestvideo[ext=mp4][height<=?1080]+bestaudio[ext=m4a]/bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/bestvideo+bestaudio/best'
-                    ydl_opts['postprocessors'] = [{'key': 'FFmpegVideoConvertor', 'preferedformat': 'mp4'}]
-                elif "MKV" in self.format_choice:
-                    expected_ext = "mkv"
-                    ydl_opts['format'] = 'bestvideo+bestaudio/best'
-                    ydl_opts['postprocessors'] = [{'key': 'FFmpegVideoConvertor', 'preferedformat': 'mkv'}]
-                elif "WEBM" in self.format_choice:
-                    expected_ext = "webm"
-                    ydl_opts['format'] = 'bestvideo[ext=webm]+bestaudio[ext=webm]/best[ext=webm]/bestvideo+bestaudio/best'
-                    ydl_opts['postprocessors'] = [{'key': 'FFmpegVideoConvertor', 'preferedformat': 'webm'}]
-                elif "AVI" in self.format_choice:
-                    expected_ext = "avi"
-                    ydl_opts['format'] = 'bestvideo+bestaudio/best'
-                    ydl_opts['postprocessors'] = [{'key': 'FFmpegVideoConvertor', 'preferedformat': 'avi'}]
+                if not ffmpeg_path:
+                    # Fallback if ffmpeg is missing: request pre-merged formats
+                    if "MP4" in self.format_choice:
+                        expected_ext = "mp4"
+                        ydl_opts['format'] = 'best[ext=mp4]/best'
+                    elif "WEBM" in self.format_choice:
+                        expected_ext = "webm"
+                        ydl_opts['format'] = 'best[ext=webm]/best'
+                    else:
+                        ydl_opts['format'] = 'best'
+                else:
+                    if "MP4" in self.format_choice:
+                        expected_ext = "mp4"
+                        ydl_opts['format'] = 'bestvideo[ext=mp4][height<=?1080]+bestaudio[ext=m4a]/bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/bestvideo+bestaudio/best'
+                        ydl_opts['postprocessors'] = [{'key': 'FFmpegVideoConvertor', 'preferedformat': 'mp4'}]
+                    elif "MKV" in self.format_choice:
+                        expected_ext = "mkv"
+                        ydl_opts['format'] = 'bestvideo+bestaudio/best'
+                        ydl_opts['postprocessors'] = [{'key': 'FFmpegVideoConvertor', 'preferedformat': 'mkv'}]
+                    elif "WEBM" in self.format_choice:
+                        expected_ext = "webm"
+                        ydl_opts['format'] = 'bestvideo[ext=webm]+bestaudio[ext=webm]/best[ext=webm]/bestvideo+bestaudio/best'
+                        ydl_opts['postprocessors'] = [{'key': 'FFmpegVideoConvertor', 'preferedformat': 'webm'}]
+                    elif "AVI" in self.format_choice:
+                        expected_ext = "avi"
+                        ydl_opts['format'] = 'bestvideo+bestaudio/best'
+                        ydl_opts['postprocessors'] = [{'key': 'FFmpegVideoConvertor', 'preferedformat': 'avi'}]
             else: 
                 ydl_opts['format'] = 'bestaudio/best'
                 ydl_opts['postprocessors'] = [{'key': 'FFmpegExtractAudio'}]

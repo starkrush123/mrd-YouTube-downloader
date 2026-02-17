@@ -4,6 +4,7 @@ import re
 import yt_dlp
 from PySide6.QtCore import QThread, Signal, QObject
 from utils.constants import AI_FEATURES_DEFAULT, AI_FEATURES_LABELS
+from utils.helpers import get_js_runtime_options
 
 class AIHandler:
     COMMANDS = {
@@ -381,6 +382,7 @@ class _AIWorker(QThread):
             'extract_flat': True,
             'noplaylist': True
         }
+        ydl_opts.update(get_js_runtime_options())
         search_query = f"ytsearch{max_results}:{query}"
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:

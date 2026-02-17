@@ -30,6 +30,7 @@ from ui.handlers.dialog_handler import DialogHandler
 from ui.handlers.signal_connector import SignalConnector
 from utils.gemini_client import GeminiClient
 from ui.handlers.ai_handler import AIHandler
+from utils.helpers import ensure_qjs_installed
 
 # Import refactored modules
 from ui.core.main_window_core import MainWindowCore
@@ -103,6 +104,7 @@ class MainWindow(MainWindowCore):
         self.events.init_clipboard_monitor()
         
         QTimer.singleShot(2000, lambda: self.update_manager.initiate_update_check(manual_check=False))
+        QTimer.singleShot(1000, lambda: ensure_qjs_installed(self))
 
     def _create_menu_bar(self):
         menu_bar = MenuBar(self)

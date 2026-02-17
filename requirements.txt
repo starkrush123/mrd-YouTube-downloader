@@ -1,4 +1,5 @@
 yt-dlp
+yt-dlp-ejs
 requests
 PySide6
 google-generativeai

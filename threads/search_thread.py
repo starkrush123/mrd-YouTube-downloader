@@ -11,7 +11,7 @@ from utils.constants import (
     MAX_SEARCH_CACHE_ENTRIES,
     CACHE_LOCK,
 )
-from utils.helpers import dprint
+from utils.helpers import dprint, get_js_runtime_options
 
 def _cleanup_and_get_from_cache(cache_key, now):
     with CACHE_LOCK:
@@ -75,6 +75,7 @@ class SearchThread(QThread):
             if self.search_type == "Video":
                 ydl_opts = {'quiet': True, 'nocheckcertificate': True, 'skip_download': True, 'extract_flat': True, 'noplaylist': True}
                 ydl_opts.update(cookie_opts)
+                ydl_opts.update(get_js_runtime_options())
                 search_query_yt = f"ytsearch{self.limit_count}:{self.query}"
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     result = ydl.extract_info(search_query_yt, download=False)
@@ -141,6 +142,7 @@ class SearchThread(QThread):
         }
         if cookie_opts:
             ydl_opts.update(cookie_opts)
+        ydl_opts.update(get_js_runtime_options())
 
         collected = []
         try:
@@ -220,6 +222,8 @@ class PlaylistFetchThread(QThread):
             c_file = self.cookie_params.get('file', '')
             if c_file and os.path.exists(c_file):
                 ydl_opts['cookiefile'] = c_file
+        
+        ydl_opts.update(get_js_runtime_options())
 
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -284,6 +288,8 @@ class ChannelFetchThread(QThread):
             c_file = self.cookie_params.get('file', '')
             if c_file and os.path.exists(c_file):
                 ydl_opts['cookiefile'] = c_file
+        
+        ydl_opts.update(get_js_runtime_options())
 
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:

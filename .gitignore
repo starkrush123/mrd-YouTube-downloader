@@ -136,3 +136,21 @@ errors.txt
 ChangeLog.md
 docs/
 build_nuitka.bats
+
+# Project Specific Binaries
+qjs.exe
+aria2c.exe
+*.dll
+*.exe
+
+# Logs and user settings
+*.log
+downloader_settings.json
+nuitka-crash-report.xml
+
+# IDE and Tooling
+.vscode/
+.idea/
+.gemini/
+.pytest_cache/
+.ruff_cache/

@@ -33,7 +33,13 @@ Halo semua! Selamat datang di mrd YouTube Downloader, aplikasi simpel tapi power
 
 Aplikasi ini dirancang untuk berjalan di sistem operasi Windows.
 
-Semua dependensi yang diperlukan akan otomatis terinstal jika kalian menggunakan installer dari [tab Releases](https://github.com/starkrush123/mrd-YouTube-downloader/releases).
+**Penting (Instalasi JavaScript Runtime):**
+Untuk menghindari error "No JavaScript interpreter found" saat mengunduh dari YouTube:
+1. Download **QuickJS** (direkomendasikan): [qjs-windows-x86_64.exe](https://github.com/quickjs-ng/quickjs/releases).
+2. Ubah nama file menjadi `qjs.exe` dan letakkan di folder aplikasi (bersama `main.py`).
+3. Atau install **Deno** dari [deno.com](https://deno.com).
+
+Semua dependensi Python lainnya akan otomatis terinstal jika kalian menggunakan installer dari [tab Releases](https://github.com/starkrush123/mrd-YouTube-downloader/releases).
 
 ## Lisensi
 

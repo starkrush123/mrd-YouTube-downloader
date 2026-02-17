@@ -1,6 +1,7 @@
 import yt_dlp
 import os
 from PySide6.QtCore import QThread, Signal
+from utils.helpers import get_js_runtime_options
 
 class StreamInfoThread(QThread):
     stream_url_ready = Signal(str, str, bool)
@@ -28,6 +29,8 @@ class StreamInfoThread(QThread):
                 c_file = self.cookie_params.get('file', '')
                 if c_file and os.path.exists(c_file):
                     ydl_opts['cookiefile'] = c_file
+            
+            ydl_opts.update(get_js_runtime_options())
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl: 
                 info = ydl.extract_info(self.page_url, download=False)
