@@ -133,20 +133,22 @@ cython_debug/
 
 # Custom ignores
 errors.txt
-ChangeLog.md
 docs/
-build_nuitka.bats
+
+# Nuitka Build Artifacts
+*.build/
+*.dist/
+*.onefile-build/
+nuitka-crash-report.xml
 
 # Project Specific Binaries
 qjs.exe
-aria2c.exe
-*.dll
 *.exe
+!build_nuitka.bat
 
 # Logs and user settings
 *.log
 downloader_settings.json
-nuitka-crash-report.xml
 
 # IDE and Tooling
 .vscode/
@@ -154,3 +156,5 @@ nuitka-crash-report.xml
 .gemini/
 .pytest_cache/
 .ruff_cache/
+.agent/
+.nuitka/
