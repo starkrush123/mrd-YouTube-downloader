@@ -4,3 +4,4 @@ requests
 PySide6
 google-generativeai
 keyring
+ytmusicapi
