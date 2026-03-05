@@ -1,7 +1,7 @@
 import yt_dlp
 import os
 from PySide6.QtCore import QThread, Signal
-from utils.helpers import get_js_runtime_options
+from utils.helpers import get_js_runtime_options, classify_yt_dlp_error
 
 class StreamInfoThread(QThread):
     stream_url_ready = Signal(str, str, bool)
@@ -53,7 +53,10 @@ class StreamInfoThread(QThread):
                 self.stream_error.emit("Tidak dapat menemukan URL streaming valid.")
         except yt_dlp.utils.DownloadError as e:
             err_str = str(e)
-            if "Could not copy" in err_str and "cookie" in err_str:
+            classified = classify_yt_dlp_error(err_str)
+            if classified:
+                self.stream_error.emit(classified)
+            elif "Could not copy" in err_str and "cookie" in err_str:
                 self.stream_error.emit("Browser terkunci: Tutup browser untuk import cookies.")
             elif "Failed to decrypt" in err_str or "DPAPI" in err_str:
                 self.stream_error.emit("Gagal dekripsi cookies. Gunakan metode File Cookies (.txt).")

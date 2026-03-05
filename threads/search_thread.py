@@ -11,7 +11,7 @@ from utils.constants import (
     MAX_SEARCH_CACHE_ENTRIES,
     CACHE_LOCK,
 )
-from utils.helpers import dprint, get_js_runtime_options
+from utils.helpers import dprint, get_js_runtime_options, classify_yt_dlp_error
 
 def _cleanup_and_get_from_cache(cache_key, now):
     with CACHE_LOCK:
@@ -107,6 +107,10 @@ class SearchThread(QThread):
                     
         except yt_dlp.utils.DownloadError as e:
             error_msg = str(e)
+            classified = classify_yt_dlp_error(error_msg)
+            if classified:
+                self.search_error.emit(classified)
+                return
             if "Could not copy" in error_msg and "cookie" in error_msg:
                 self.search_error.emit("Browser terkunci: Tutup browser Anda.")
                 return

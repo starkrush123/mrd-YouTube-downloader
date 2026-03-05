@@ -180,7 +180,7 @@ class AIHandler:
             self.main_window.clear_input_field()
             self.ai_panel.output_display.append("AI: Kolom input utama telah dikosongkan.")
         elif command == "open_settings":
-            self.main_window.dialog_handler.show_settings_dialog()
+            self.main_window.dialog_handler.open_settings_dialog()
             self.ai_panel.output_display.append("AI: Membuka dialog pengaturan...")
         elif command == "show_history":
             self.main_window.tab_widget.setCurrentWidget(self.main_window.history_tab)

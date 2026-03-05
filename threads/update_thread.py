@@ -2,6 +2,17 @@ import os
 import json
 import requests
 from PySide6.QtCore import QThread, Signal
+import re
+
+
+def _parse_version(version_text):
+    """Parse semantic-ish version string into tuple for safe comparison."""
+    if not version_text:
+        return (0,)
+    parts = re.findall(r'\d+', str(version_text))
+    if not parts:
+        return (0,)
+    return tuple(int(p) for p in parts)
 
 class UpdateCheckThread(QThread):
     update_available = Signal(dict)
@@ -27,9 +38,11 @@ class UpdateCheckThread(QThread):
             if not latest_version or not download_url_sfx:
                 self.update_check_error.emit("Format info versi tidak valid dari URL.")
                 return
-            if latest_version > self.current_version:
+            latest_v = _parse_version(latest_version)
+            current_v = _parse_version(self.current_version)
+            if latest_v > current_v:
                 self.update_available.emit(version_info)
-            elif self.current_version > latest_version:
+            elif current_v > latest_v:
                 self.no_update_found.emit(f"Versi Anda ({self.current_version}) lebih baru dari versi yang tersedia di server ({latest_version}).")
             else:
                 self.no_update_found.emit(f"Versi Anda ({self.current_version}) adalah yang terbaru.")

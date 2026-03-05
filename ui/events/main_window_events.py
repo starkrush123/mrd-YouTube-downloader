@@ -15,8 +15,8 @@ class MainWindowEvents:
         self.main_window = main_window
 
     def _update_placeholder_text(self, text):
-        self.main_window.main_view_widget.url_input_label.setText(f"URL / Kata Kunci {text}:")
-        self.main_window.main_view_widget.input_line_edit.setPlaceholderText(f"Masukkan URL atau kata kunci {text.lower()}")
+        self.main_window.main_view_widget.url_input_label.setText(f"{_('URL / Kata Kunci')} {text}:")
+        self.main_window.main_view_widget.input_line_edit.setPlaceholderText(f"{_('Masukkan URL atau kata kunci')} {text.lower()}")
 
     def keyPressEvent(self, event: QKeyEvent):
         if self.main_window.tab_widget.currentWidget() != self.main_window.main_view_widget:
@@ -62,7 +62,7 @@ class MainWindowEvents:
 
     def clear_input_field(self):
         self.main_window.main_view_widget.input_line_edit.clear()
-        self.main_window.set_status_text("Input field dibersihkan.")
+        self.main_window.set_status_text(_("Input field dibersihkan."))
         self.main_window.main_view_widget.input_line_edit.setFocus()
 
     def paste_and_process_input(self):
@@ -70,18 +70,18 @@ class MainWindowEvents:
         clipboard_text = clipboard.text()
         if clipboard_text:
             self.main_window.main_view_widget.input_line_edit.setText(clipboard_text)
-            self.main_window.set_status_text(f"Teks dari clipboard ditempel: {clipboard_text[:50]}...")
+            self.main_window.set_status_text(f"{_('Teks dari clipboard ditempel')}: {clipboard_text[:50]}...")
             self.main_window.search_handler.process_input()
         else:
-            QMessageBox.information(self.main_window, "Clipboard Kosong", "Tidak ada teks di clipboard untuk ditempel.")
-            self.main_window.set_status_text("Clipboard kosong.")
+            QMessageBox.information(self.main_window, _("Clipboard Kosong"), _("Tidak ada teks di clipboard untuk ditempel."))
+            self.main_window.set_status_text(_("Clipboard kosong."))
 
     
 
     def stop_current_operation(self, confirm=True):
         stopped_something = False
         if self.main_window.media_player.playbackState() != self.main_window.media_player.PlaybackState.StoppedState:
-            if not confirm or QMessageBox.question(self.main_window, "Hentikan Playback?", "Yakin hentikan playback saat ini?") == QMessageBox.StandardButton.Yes:
+            if not confirm or QMessageBox.question(self.main_window, _("Hentikan Playback?"), _("Yakin hentikan playback saat ini?")) == QMessageBox.StandardButton.Yes:
                 self.main_window.player_handler.close_player_view()
                 stopped_something = True
         if self.main_window.download_thread and self.main_window.download_thread.isRunning():
@@ -107,11 +107,11 @@ class MainWindowEvents:
                     stopped_something = True
                     break
         if self.main_window.download_update_thread and self.main_window.download_update_thread.isRunning():
-            if not confirm or QMessageBox.question(self.main_window, "Hentikan Download Update?", "Yakin hentikan download pembaruan?") == QMessageBox.StandardButton.Yes:
+            if not confirm or QMessageBox.question(self.main_window, _("Hentikan Download Update?"), _("Yakin hentikan download pembaruan?")) == QMessageBox.StandardButton.Yes:
                 self.main_window.cancel_update_download()
                 stopped_something = True
         if not stopped_something and confirm:
-            self.main_window.set_status_text("Tidak ada operasi aktif yang bisa dihentikan saat ini.")
+            self.main_window.set_status_text(_("Tidak ada operasi aktif yang bisa dihentikan saat ini."))
         QTimer.singleShot(100, lambda: self.main_window.set_ui_busy_state(False, "stop_operation_attempted"))
 
     def _on_any_thread_finished(self):
@@ -123,7 +123,7 @@ class MainWindowEvents:
             self.main_window.download_thread = None
             self.main_window.current_list_batch_download_active = False
             if not "Selesai" in self.main_window.main_view_widget.status_label.text() and not "Gagal" in self.main_window.main_view_widget.status_label.text() and not "Batch" in self.main_window.main_view_widget.status_label.text():
-                 self.main_window.set_status_text("Operasi unduhan telah selesai atau dihentikan.")
+                 self.main_window.set_status_text(_("Operasi unduhan telah selesai atau dihentikan."))
             QTimer.singleShot(150, self.restore_focus_after_download)
         elif sender == self.main_window.search_thread:
             self.main_window.search_thread = None
@@ -133,6 +133,8 @@ class MainWindowEvents:
             self.main_window.channel_fetch_thread = None
         elif sender == self.main_window.stream_info_thread:
             self.main_window.stream_info_thread = None
+        elif sender == self.main_window.related_fetch_thread:
+            self.main_window.related_fetch_thread = None
         elif sender == self.main_window.update_check_thread:
             self.main_window.update_check_thread = None
             if self.main_window._is_initial_startup_check:
@@ -148,8 +150,12 @@ class MainWindowEvents:
                  self.main_window.operation_progress_dialog = None
                  
         self.main_window.set_ui_busy_state(False, "thread_finished")
-        if not (self.main_window.active_search_results_dialog and self.main_window.active_search_results_dialog.isVisible()):
-             self.main_window.update_window_title_status("Siap")
+        is_playing_or_paused = self.main_window.media_player.playbackState() in (
+            self.main_window.media_player.PlaybackState.PlayingState,
+            self.main_window.media_player.PlaybackState.PausedState,
+        )
+        if not is_playing_or_paused and not (self.main_window.active_search_results_dialog and self.main_window.active_search_results_dialog.isVisible()):
+            self.main_window.update_window_title_status(_("Siap"))
         
     def restore_focus_after_download(self):
         url_to_focus = None
@@ -175,7 +181,7 @@ class MainWindowEvents:
             event.accept()
             return
         self.main_window._is_closing_app = True
-        self.main_window.set_status_text("Menutup aplikasi, membersihkan...")
+        self.main_window.set_status_text(_("Menutup aplikasi, membersihkan..."))
         event.ignore()
         QTimer.singleShot(100, self._finalize_close)
 

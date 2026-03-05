@@ -1,0 +1,363 @@
+# Translation file for mrd YouTube Downloader
+# Language: id (Indonesian) — source language, msgstr = msgid
+#
+msgid ""
+msgstr ""
+ "Content-Type: text/plain; charset=UTF-8\n"
+ "Content-Transfer-Encoding: 8bit\n"
+ "Language: id\n"
+ "MIME-Version: 1.0\n"
+
+# ── main_layout.py ──────────────────────────────────────────
+msgid "Tipe:"
+msgstr "Tipe:"
+
+msgid "Video"
+msgstr "Video"
+
+msgid "Playlist"
+msgstr "Playlist"
+
+msgid "Channel"
+msgstr "Channel"
+
+msgid "Pilih jenis input jika bukan URL pasti"
+msgstr "Pilih jenis input jika bukan URL pasti"
+
+msgid "Go!"
+msgstr "Go!"
+
+msgid "Info"
+msgstr "Info"
+
+msgid "Siap. Masukkan URL atau kata kunci."
+msgstr "Siap. Masukkan URL atau kata kunci."
+
+# ── menu_bar.py ──────────────────────────────────────────────
+msgid "&File"
+msgstr "&File"
+
+msgid "Buka Folder Unduhan"
+msgstr "Buka Folder Unduhan"
+
+msgid "Bersihkan Input"
+msgstr "Bersihkan Input"
+
+msgid "Pengaturan..."
+msgstr "Pengaturan..."
+
+msgid "Keluar"
+msgstr "Keluar"
+
+msgid "&Alat"
+msgstr "&Alat"
+
+msgid "Tempel & Proses"
+msgstr "Tempel && Proses"
+
+msgid "&Bantuan"
+msgstr "&Bantuan"
+
+msgid "Cek Pembaruan..."
+msgstr "Cek Pembaruan..."
+
+msgid "Lihat Log Debug"
+msgstr "Lihat Log Debug"
+
+msgid "Mode Debug"
+msgstr "Mode Debug"
+
+msgid "Tentang Aplikasi..."
+msgstr "Tentang Aplikasi..."
+
+# ── main_window_core.py ──────────────────────────────────────
+msgid "Peringatan"
+msgstr "Peringatan"
+
+msgid "File yang diperlukan untuk fitur akselerasi download nggak ada. Fitur akan dinonaktifkan"
+msgstr "File yang diperlukan untuk fitur akselerasi download nggak ada. Fitur akan dinonaktifkan"
+
+msgid "Siap"
+msgstr "Siap"
+
+msgid "Pengaturan Error"
+msgstr "Pengaturan Error"
+
+msgid "Gagal membuat direktori konfigurasi:"
+msgstr "Gagal membuat direktori konfigurasi:"
+
+msgid "Error:"
+msgstr "Error:"
+
+msgid "Pengaturan tidak akan dimuat/disimpan."
+msgstr "Pengaturan tidak akan dimuat/disimpan."
+
+msgid "Gagal muat pengaturan dari"
+msgstr "Gagal muat pengaturan dari"
+
+msgid "Pakai default."
+msgstr "Pakai default."
+
+msgid "Gagal Simpan Pengaturan"
+msgstr "Gagal Simpan Pengaturan"
+
+msgid "Gagal simpan ke"
+msgstr "Gagal simpan ke"
+
+msgid "Lokasi Tidak Ditemukan"
+msgstr "Lokasi Tidak Ditemukan"
+
+msgid "Path tidak valid:"
+msgstr "Path tidak valid:"
+
+msgid "Gagal Buka Lokasi"
+msgstr "Gagal Buka Lokasi"
+
+msgid "Tidak dapat membuka:"
+msgstr "Tidak dapat membuka:"
+
+# ── settings_dialog.py ───────────────────────────────────────
+msgid "Pengaturan Aplikasi"
+msgstr "Pengaturan Aplikasi"
+
+msgid "Pilih Folder..."
+msgstr "Pilih Folder..."
+
+msgid "Simpan ke:"
+msgstr "Simpan ke:"
+
+msgid "Bahasa / Language:"
+msgstr "Bahasa / Language:"
+
+msgid "Tema Aplikasi:"
+msgstr "Tema Aplikasi:"
+
+msgid "Pilih Perangkat Output Audio"
+msgstr "Pilih Perangkat Output Audio"
+
+msgid "Audio Output:"
+msgstr "Audio Output:"
+
+msgid "Pantau Clipboard untuk URL YouTube"
+msgstr "Pantau Clipboard untuk URL YouTube"
+
+msgid "Tampilkan Notifikasi Selesai Unduh"
+msgstr "Tampilkan Notifikasi Selesai Unduh"
+
+msgid "&Umum"
+msgstr "&Umum"
+
+msgid "Format Video Default:"
+msgstr "Format Video Default:"
+
+msgid "Format Audio Default:"
+msgstr "Format Audio Default:"
+
+msgid "Sematkan Thumbnail & Metadata (Audio)"
+msgstr "Sematkan Thumbnail & Metadata (Audio)"
+
+msgid "Gunakan akselerasi pararel (aria2c)"
+msgstr "Gunakan akselerasi pararel (aria2c)"
+
+msgid "Dapat mempercepat unduhan secara signifikan. Membutuhkan aria2c."
+msgstr "Dapat mempercepat unduhan secara signifikan. Membutuhkan aria2c."
+
+msgid "Jumlah Hasil Pencarian:"
+msgstr "Jumlah Hasil Pencarian:"
+
+msgid "Aksi Dobel Klik:"
+msgstr "Aksi Dobel Klik:"
+
+msgid "&Unduhan"
+msgstr "&Unduhan"
+
+msgid "Balik Shortcut Putar (Enter / Ctrl+Enter)"
+msgstr "Balik Shortcut Putar (Enter / Ctrl+Enter)"
+
+msgid "Jika aktif, Enter untuk memutar video dan Ctrl+Enter untuk memutar audio."
+msgstr "Jika aktif, Enter untuk memutar video dan Ctrl+Enter untuk memutar audio."
+
+msgid "Otomatis putar item berikutnya"
+msgstr "Otomatis putar item berikutnya"
+
+msgid "&Pintasan"
+msgstr "&Pintasan"
+
+msgid "Autentikasi YouTube (Cookies)"
+msgstr "Autentikasi YouTube (Cookies)"
+
+msgid "Tidak Ada"
+msgstr "Tidak Ada"
+
+msgid "Import dari Browser"
+msgstr "Import dari Browser"
+
+msgid "File Netscape Cookies (.txt)"
+msgstr "File Netscape Cookies (.txt)"
+
+msgid "Sumber Cookies:"
+msgstr "Sumber Cookies:"
+
+msgid "Browser:"
+msgstr "Browser:"
+
+msgid "Path File:"
+msgstr "Path File:"
+
+msgid "Pilih..."
+msgstr "Pilih..."
+
+msgid "Kunci API Gemini:"
+msgstr "Kunci API Gemini:"
+
+msgid "Kemampuan AI"
+msgstr "Kemampuan AI"
+
+msgid "Fitur AI:"
+msgstr "Fitur AI:"
+
+msgid "&Akun && AI"
+msgstr "&Akun && AI"
+
+msgid "Komponen Tidak Ditemukan"
+msgstr "Komponen Tidak Ditemukan"
+
+msgid "aria2c tidak ditemukan di sistem. Fitur ini dimatikan."
+msgstr "aria2c tidak ditemukan di sistem. Fitur ini dimatikan."
+
+msgid "Pilih Folder Penyimpanan"
+msgstr "Pilih Folder Penyimpanan"
+
+msgid "Pilih File Cookies"
+msgstr "Pilih File Cookies"
+
+msgid "Perangkat Audio"
+msgstr "Perangkat Audio"
+
+msgid "Perangkat output audio berhasil disimpan."
+msgstr "Perangkat output audio berhasil disimpan."
+
+msgid "Tidak ada perangkat output audio yang dipilih."
+msgstr "Tidak ada perangkat output audio yang dipilih."
+
+msgid "Restart Diperlukan"
+msgstr "Restart Diperlukan"
+
+msgid "Bahasa telah diubah. Silakan restart aplikasi agar perubahan diterapkan sepenuhnya."
+msgstr "Bahasa telah diubah. Silakan restart aplikasi agar perubahan diterapkan sepenuhnya."
+
+# ── helpers.py ───────────────────────────────────────────────
+msgid "Terjadi Kesalahan Fatal"
+msgstr "Terjadi Kesalahan Fatal"
+
+msgid "Aplikasi mengalami kesalahan yang tidak terduga.\nBerikut adalah detail traceback:"
+msgstr "Aplikasi mengalami kesalahan yang tidak terduga.\nBerikut adalah detail traceback:"
+
+msgid "Salin Traceback"
+msgstr "Salin Traceback"
+
+msgid "Traceback Disalin"
+msgstr "Traceback Disalin"
+
+msgid "Detail error traceback telah disalin ke clipboard."
+msgstr "Detail error traceback telah disalin ke clipboard."
+
+msgid "Mengunduh QuickJS Runtime..."
+msgstr "Mengunduh QuickJS Runtime..."
+
+msgid "Batal"
+msgstr "Batal"
+
+msgid "Download Dependensi"
+msgstr "Download Dependensi"
+
+msgid "Gagal mendownload QuickJS:"
+msgstr "Gagal mendownload QuickJS:"
+
+msgid "Download Error"
+msgstr "Download Error"
+
+msgid "QuickJS JavaScript Runtime tidak ditemukan."
+msgstr "QuickJS JavaScript Runtime tidak ditemukan."
+
+msgid "Runtime ini diperlukan agar download dari YouTube berjalan lancar (bypass JavaScript challenge)."
+msgstr "Runtime ini diperlukan agar download dari YouTube berjalan lancar (bypass JavaScript challenge)."
+
+msgid "Apakah Anda ingin mendownloadnya secara otomatis sekarang (ukuran ~1MB)?"
+msgstr "Apakah Anda ingin mendownloadnya secara otomatis sekarang (ukuran ~1MB)?"
+
+msgid "QuickJS Diperlukan"
+msgstr "QuickJS Diperlukan"
+
+msgid "Berhasil"
+msgstr "Berhasil"
+
+msgid "QuickJS berhasil diinstal. Anda bisa mulai mendownload."
+msgstr "QuickJS berhasil diinstal. Anda bisa mulai mendownload."
+
+msgid "Aplikasi mungkin akan mengalami error saat mengunduh dari YouTube tanpa QuickJS."
+msgstr "Aplikasi mungkin akan mengalami error saat mengunduh dari YouTube tanpa QuickJS."
+
+# ── main_window_settings.py ──────────────────────────────────
+msgid "Mode Debug Diaktifkan. Log akan dicetak/disimpan."
+msgstr "Mode Debug Diaktifkan. Log akan dicetak/disimpan."
+
+msgid "Mode Debug Dinonaktifkan."
+msgstr "Mode Debug Dinonaktifkan."
+
+msgid "Mode Debug Nonaktif"
+msgstr "Mode Debug Nonaktif"
+
+msgid "Mode debug saat ini nonaktif dan file log tidak ditemukan.\nAktifkan mode debug dan lakukan beberapa aksi untuk membuat log."
+msgstr "Mode debug saat ini nonaktif dan file log tidak ditemukan.\nAktifkan mode debug dan lakukan beberapa aksi untuk membuat log."
+
+msgid "File log tidak ditemukan (mode debug nonaktif)."
+msgstr "File log tidak ditemukan (mode debug nonaktif)."
+
+msgid "Membuka file log:"
+msgstr "Membuka file log:"
+
+msgid "Gagal Buka Log"
+msgstr "Gagal Buka Log"
+
+msgid "Tidak dapat membuka file log:"
+msgstr "Tidak dapat membuka file log:"
+
+msgid "Gagal membuka file log."
+msgstr "Gagal membuka file log."
+
+msgid "Log Tidak Ditemukan"
+msgstr "Log Tidak Ditemukan"
+
+msgid "File log tidak ditemukan di:"
+msgstr "File log tidak ditemukan di:"
+
+msgid "Log akan dibuat jika mode debug aktif dan ada aktivitas."
+msgstr "Log akan dibuat jika mode debug aktif dan ada aktivitas."
+
+msgid "File log belum ada."
+msgstr "File log belum ada."
+
+msgid "Membuka folder unduhan:"
+msgstr "Membuka folder unduhan:"
+
+msgid "Folder Tidak Ditemukan"
+msgstr "Folder Tidak Ditemukan"
+
+msgid "Folder unduhan"
+msgstr "Folder unduhan"
+
+msgid "tidak valid atau tidak ada. Cek pengaturan."
+msgstr "tidak valid atau tidak ada. Cek pengaturan."
+
+msgid "Gagal membuka folder unduhan."
+msgstr "Gagal membuka folder unduhan."
+
+msgid "Volume pemutar: {percent}%"
+msgstr "Volume pemutar: {percent}%"
+
+msgid "Koneksi stream terganggu. Mencoba menyambung ulang ({attempt}/{total})..."
+msgstr "Koneksi stream terganggu. Mencoba menyambung ulang ({attempt}/{total})..."
+
+msgid "Stream gagal dipulihkan. Melanjutkan ke item berikutnya..."
+msgstr "Stream gagal dipulihkan. Melanjutkan ke item berikutnya..."

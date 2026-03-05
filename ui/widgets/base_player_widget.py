@@ -8,6 +8,7 @@ class BasePlayerWidget(QWidget):
     download_requested = Signal(str)
     playback_rate_change_requested = Signal(float)
     SEEK_INTERVAL = 5000
+    VOLUME_STEP_PERCENT = 5
 
     def __init__(self, media_player, parent=None, settings=None, main_window=None):
         super().__init__(parent)
@@ -18,6 +19,7 @@ class BasePlayerWidget(QWidget):
         self.audio_output = QAudioOutput()
         self.media_player.setAudioOutput(self.audio_output)
         self._load_audio_output_device()
+        self._load_playback_volume()
 
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
@@ -45,6 +47,27 @@ class BasePlayerWidget(QWidget):
         else:
             self.media_player.play()
 
+    def _load_playback_volume(self):
+        saved_percent = self.settings.get("playback_volume_percent", 100)
+        try:
+            volume_percent = max(0, min(100, int(saved_percent)))
+        except (TypeError, ValueError):
+            volume_percent = 100
+        self.audio_output.setVolume(volume_percent / 100.0)
+
+    def _change_volume_by_percent(self, delta_percent):
+        current_percent = int(round(self.audio_output.volume() * 100))
+        new_percent = max(0, min(100, current_percent + int(delta_percent)))
+        if new_percent == current_percent:
+            return
+        self.audio_output.setVolume(new_percent / 100.0)
+        self.settings["playback_volume_percent"] = new_percent
+        if self.main_window:
+            self.main_window.save_app_settings(show_error=False)
+            self.main_window.set_status_text(
+                _("Volume pemutar: {percent}%").format(percent=new_percent)
+            )
+
     def keyPressEvent(self, event):
         key = event.key()
         if key == Qt.Key.Key_Escape:
@@ -55,6 +78,10 @@ class BasePlayerWidget(QWidget):
             self.media_player.setPosition(max(0, self.media_player.position() - self.SEEK_INTERVAL))
         elif key == Qt.Key.Key_Right:
             self.media_player.setPosition(self.media_player.position() + self.SEEK_INTERVAL)
+        elif key == Qt.Key.Key_Up and event.modifiers() == Qt.KeyboardModifier.NoModifier:
+            self._change_volume_by_percent(self.VOLUME_STEP_PERCENT)
+        elif key == Qt.Key.Key_Down and event.modifiers() == Qt.KeyboardModifier.NoModifier:
+            self._change_volume_by_percent(-self.VOLUME_STEP_PERCENT)
         elif event.key() == Qt.Key.Key_Up and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
             self.playback_rate_change_requested.emit(0.25)
         elif event.key() == Qt.Key.Key_Down and event.modifiers() == Qt.KeyboardModifier.ControlModifier:

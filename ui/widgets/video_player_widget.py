@@ -34,11 +34,11 @@ class VideoPlayerWidget(BasePlayerWidget):
         
         controls_layout_internal = QHBoxLayout()
         controls_layout_internal.setContentsMargins(10, 0, 10, 0)
-        self.play_pause_button = QPushButton("Jeda")
+        self.play_pause_button = QPushButton(_("Jeda"))
         self.play_pause_button.clicked.connect(self.toggle_play_pause)
         self.play_pause_button.setStyleSheet("color: white; background-color: transparent; border: 1px solid white; padding: 8px 16px; border-radius: 4px;")
         
-        self.stop_button_dialog = QPushButton("Hentikan & Tutup")
+        self.stop_button_dialog = QPushButton(_("Hentikan & Tutup"))
         self.stop_button_dialog.clicked.connect(self.close_requested.emit)
         self.stop_button_dialog.setStyleSheet("color: white; background-color: transparent; border: 1px solid white; padding: 8px 16px; border-radius: 4px;")
         
@@ -116,13 +116,13 @@ class VideoPlayerWidget(BasePlayerWidget):
 
     def update_play_pause_button_text(self, state):
         if state == QMediaPlayer.PlaybackState.PlayingState:
-            self.play_pause_button.setText("Jeda")
-            self.play_pause_button.setToolTip("Jeda (Spasi)")
+            self.play_pause_button.setText(_("Jeda"))
+            self.play_pause_button.setToolTip(_("Jeda (Spasi)"))
             if self.autohide_ms > 0:
                 self.reset_hide_controls_timer()
         else:
-            self.play_pause_button.setText("Putar")
-            self.play_pause_button.setToolTip("Lanjutkan (Spasi)")
+            self.play_pause_button.setText(_("Putar"))
+            self.play_pause_button.setToolTip(_("Lanjutkan (Spasi)"))
             if self.hide_controls_timer.isActive():
                 self.hide_controls_timer.stop()
             self.show_controls()

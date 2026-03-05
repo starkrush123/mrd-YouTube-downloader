@@ -16,11 +16,11 @@ class DownloadProgressDialog(QDialog):
     
     def __init__(self, title, parent=None):
         super().__init__(parent); 
-        self.setWindowTitle(f"Mengunduh: {title[:40]}...")
+        self.setWindowTitle(f"{_('Mengunduh')}: {title[:40]}...")
         self.setMinimumWidth(450)
         
         layout = QVBoxLayout(self)
-        self.title_label = QLabel(f"Mengunduh: <b>{title}</b>")
+        self.title_label = QLabel(f"{_('Mengunduh')}: <b>{title}</b>")
         self.title_label.setWordWrap(True)
         layout.addWidget(self.title_label)
         
@@ -28,18 +28,18 @@ class DownloadProgressDialog(QDialog):
         self.progress_bar.setRange(0, 100)
         self.progress_bar.setValue(0)
         self.progress_bar.setTextVisible(True)
-        self.progress_bar.setFormat("%p% - Memulai...")
+        self.progress_bar.setFormat(f"%p% - {_('Memulai...')}")
         layout.addWidget(self.progress_bar)
         
-        self.status_label = QLabel("Status: Memulai unduhan...")
+        self.status_label = QLabel(f"{_('Status')}: {_('Memulai unduhan...')}")
         self.status_label.setWordWrap(True)
         layout.addWidget(self.status_label)
         
-        self.speed_eta_label = QLabel("Kecepatan: N/A, ETA: N/A")
+        self.speed_eta_label = QLabel(f"{_('Kecepatan')}: N/A, ETA: N/A")
         layout.addWidget(self.speed_eta_label)
         
-        self.cancel_button = QPushButton("Batal")
-        self.cancel_button.setToolTip("Batalkan unduhan (Esc)")
+        self.cancel_button = QPushButton(_("Batal"))
+        self.cancel_button.setToolTip(_("Batalkan unduhan (Esc)"))
         self.cancel_button.clicked.connect(self.cancel_requested.emit)
         layout.addWidget(self.cancel_button)
         
@@ -53,19 +53,19 @@ class DownloadProgressDialog(QDialog):
             super().keyPressEvent(event)
 
     def update_title(self, title): 
-        self.setWindowTitle(f"Mengunduh: {title[:40]}...")
-        self.title_label.setText(f"Mengunduh: <b>{title}</b>")
+        self.setWindowTitle(f"{_('Mengunduh')}: {title[:40]}...")
+        self.title_label.setText(f"{_('Mengunduh')}: <b>{title}</b>")
         
     def update_progress(self, percentage, speed, eta): 
         self.progress_bar.setValue(percentage)
         self.progress_bar.setFormat(f"{percentage}%")
-        self.speed_eta_label.setText(f"Kecepatan: {speed}, ETA: {eta}")
+        self.speed_eta_label.setText(f"{_('Kecepatan')}: {speed}, ETA: {eta}")
         
     def update_status(self, message):
-        self.status_label.setText(f"Status: {message}")
+        self.status_label.setText(f"{_('Status')}: {message}")
         if "Mengonversi" in message: 
             self.progress_bar.setRange(0,0)
-            self.progress_bar.setFormat("Mengonversi...")
+            self.progress_bar.setFormat(_("Mengonversi..."))
             self.speed_eta_label.setText("")
         elif self.progress_bar.minimum() == 0 and self.progress_bar.maximum() == 0 : 
             self.progress_bar.setRange(0,100)
@@ -73,7 +73,7 @@ class DownloadProgressDialog(QDialog):
     def download_complete(self, success, message):
         self.progress_bar.setRange(0,100)
         self.progress_bar.setValue(100 if success else self.progress_bar.value())
-        self.progress_bar.setFormat("Selesai!" if success else "Gagal!")
-        self.status_label.setText(f"Status: {message}")
+        self.progress_bar.setFormat(_("Selesai!") if success else _("Gagal!"))
+        self.status_label.setText(f"{_('Status')}: {message}")
         self.speed_eta_label.setText("")
         self.cancel_button.setEnabled(False)

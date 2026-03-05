@@ -14,7 +14,7 @@ class HistoryTab(QWidget):
 
     def setup_ui(self):
         self.history_table.setColumnCount(4)
-        self.history_table.setHorizontalHeaderLabels(['Judul', 'Tanggal Download', 'Buka File', 'Buka Folder'])
+        self.history_table.setHorizontalHeaderLabels([_("Judul"), _("Tanggal Download"), _("Buka File"), _("Buka Folder")])
         self.history_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.history_table.setTabKeyNavigation(False)
         self.history_table.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -31,12 +31,12 @@ class HistoryTab(QWidget):
             self.history_table.setItem(i, 0, item_title)
             self.history_table.setItem(i, 1, QTableWidgetItem(entry['download_date']))
 
-            open_file_btn = QPushButton('Buka File')
+            open_file_btn = QPushButton(_("Buka File"))
             open_file_btn.setFocusPolicy(Qt.NoFocus)
             open_file_btn.clicked.connect(lambda _, p=entry['file_path']: self.open_file(p))
             self.history_table.setCellWidget(i, 2, open_file_btn)
 
-            open_folder_btn = QPushButton('Buka Folder')
+            open_folder_btn = QPushButton(_("Buka Folder"))
             open_folder_btn.setFocusPolicy(Qt.NoFocus)
             open_folder_btn.clicked.connect(lambda _, p=entry['file_path']: self.open_folder(p))
             self.history_table.setCellWidget(i, 3, open_folder_btn)

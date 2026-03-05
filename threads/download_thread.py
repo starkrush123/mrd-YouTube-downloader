@@ -4,7 +4,7 @@ import re
 from copy import deepcopy
 import yt_dlp
 from PySide6.QtCore import QThread, Signal
-from utils.helpers import get_js_runtime_options
+from utils.helpers import get_js_runtime_options, classify_yt_dlp_error
 
 ANSI_ESCAPE_RE = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
 
@@ -255,7 +255,10 @@ class DownloadThread(QThread):
         except InterruptedError as e: msg = f"Unduhan dihentikan: {str(e)}"
         except yt_dlp.utils.DownloadError as e:
             cleaned_err = self._sanitize_error_message(str(e))
-            if "Could not copy" in cleaned_err and "cookie" in cleaned_err:
+            classified = classify_yt_dlp_error(cleaned_err)
+            if classified:
+                msg = classified
+            elif "Could not copy" in cleaned_err and "cookie" in cleaned_err:
                 msg = "Gagal akses cookies: Browser sedang terbuka/terkunci. Harap tutup browser sepenuhnya."
             elif "Failed to decrypt" in cleaned_err or "DPAPI" in cleaned_err:
                 msg = "Gagal dekripsi cookies browser. Coba tutup browser atau gunakan metode File Cookies (.txt)."

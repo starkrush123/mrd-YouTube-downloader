@@ -1,5 +1,10 @@
 import sys
 import os
+
+# Initialize translations BEFORE any UI imports so _() is available globally
+from utils.i18n import setup_translation
+setup_translation()
+
 from PySide6.QtWidgets import QApplication, QStyle
 from PySide6.QtGui import QIcon
 from utils.helpers import global_exception_hook

@@ -11,12 +11,12 @@ class AudioPlayerWidget(BasePlayerWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(30,30,30,30)
         
-        self.title_label = QLabel("Pemutar Audio")
+        self.title_label = QLabel(_("Pemutar Audio"))
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.title_label.setStyleSheet("font-size: 28px; color: white; font-weight: bold; margin-bottom: 15px;")
         layout.addWidget(self.title_label)
         
-        self.status_label = QLabel("Memuat audio...")
+        self.status_label = QLabel(_("Memuat audio..."))
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.status_label.setStyleSheet("font-size: 18px; color: lightgray; margin-bottom: 20px;")
         layout.addWidget(self.status_label)
@@ -24,12 +24,12 @@ class AudioPlayerWidget(BasePlayerWidget):
         layout.addStretch(1)
         self.controls_layout = QHBoxLayout()
         
-        self.play_pause_button = QPushButton("Jeda")
+        self.play_pause_button = QPushButton(_("Jeda"))
         self.play_pause_button.clicked.connect(self.toggle_play_pause)
         self.play_pause_button.setStyleSheet("QPushButton { color: white; background-color: #3498db; border: none; padding: 12px 25px; font-size: 16px; border-radius: 5px;} QPushButton:hover { background-color: #2980b9; }")
         self.play_pause_button.setMinimumHeight(40)
         
-        self.stop_button_dialog = QPushButton("Hentikan & Tutup")
+        self.stop_button_dialog = QPushButton(_("Hentikan & Tutup"))
         self.stop_button_dialog.clicked.connect(self.close_requested.emit)
         self.stop_button_dialog.setStyleSheet("QPushButton { color: white; background-color: #e74c3c; border: none; padding: 12px 25px; font-size: 16px; border-radius: 5px;} QPushButton:hover { background-color: #c0392b; }")
         self.stop_button_dialog.setMinimumHeight(40)
@@ -67,17 +67,17 @@ class AudioPlayerWidget(BasePlayerWidget):
         pos, dur, state = self.media_player.position(), self.media_player.duration(), self.media_player.playbackState()
         status_text = f"{self.format_duration_ms(pos)} / {self.format_duration_ms(dur)}"
         if state == QMediaPlayer.PlaybackState.PlayingState:
-            self.status_label.setText(f"Memutar: {status_text}")
+            self.status_label.setText(f"{_('Memutar')}: {status_text}")
         elif state == QMediaPlayer.PlaybackState.PausedState:
-            self.status_label.setText(f"Dijeda: {status_text}")
+            self.status_label.setText(f"{_('Dijeda')}: {status_text}")
         else:
-            self.status_label.setText(f"Berhenti: {status_text}")
+            self.status_label.setText(f"{_('Berhenti')}: {status_text}")
 
     def update_controls_on_state_change(self, state):
         self.update_status_labels()
         if state == QMediaPlayer.PlaybackState.PlayingState:
-            self.play_pause_button.setText("Jeda")
-            self.play_pause_button.setToolTip("Jeda (Spasi)")
+            self.play_pause_button.setText(_("Jeda"))
+            self.play_pause_button.setToolTip(_("Jeda (Spasi)"))
         else:
-            self.play_pause_button.setText("Putar")
-            self.play_pause_button.setToolTip("Lanjutkan (Spasi)")
+            self.play_pause_button.setText(_("Putar"))
+            self.play_pause_button.setToolTip(_("Lanjutkan (Spasi)"))

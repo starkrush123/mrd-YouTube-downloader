@@ -12,7 +12,7 @@ class AIPanelWidget(QWidget):
         self.layout.addWidget(self.output_display)
 
         input_layout = QHBoxLayout()
-        self.input_label = QLabel("Perintah AI:")
+        self.input_label = QLabel(_("Perintah AI:"))
         self.input_field = QLineEdit()
         self.input_label.setBuddy(self.input_field)
         input_layout.addWidget(self.input_label)
@@ -20,7 +20,7 @@ class AIPanelWidget(QWidget):
 
         self.layout.addLayout(input_layout)
 
-        self.send_button = QPushButton("Kirim")
+        self.send_button = QPushButton(_("Kirim"))
         self.layout.addWidget(self.send_button)
 
         self.input_field.returnPressed.connect(self.send_button.click)

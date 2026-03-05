@@ -2,6 +2,8 @@ import sys
 import os
 import datetime
 import traceback
+import shutil
+import importlib.util
 import requests
 from PySide6.QtWidgets import (
     QApplication, QDialog, QVBoxLayout, QLabel, QTextEdit, 
@@ -28,18 +30,18 @@ def dprint(message):
 class ErrorDialog(QDialog):
     def __init__(self, error_traceback, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Terjadi Kesalahan Fatal")
+        self.setWindowTitle(_("Terjadi Kesalahan Fatal"))
         self.setMinimumSize(600, 400)
         self.error_traceback = error_traceback
         layout = QVBoxLayout(self)
-        label = QLabel("Aplikasi mengalami kesalahan yang tidak terduga.\nBerikut adalah detail traceback:")
+        label = QLabel(_("Aplikasi mengalami kesalahan yang tidak terduga.\nBerikut adalah detail traceback:"))
         layout.addWidget(label)
         self.traceback_text_edit = QTextEdit()
         self.traceback_text_edit.setText(self.error_traceback)
         self.traceback_text_edit.setReadOnly(True)
         layout.addWidget(self.traceback_text_edit)
         button_box = QDialogButtonBox()
-        copy_button = button_box.addButton("Salin Traceback", QDialogButtonBox.ButtonRole.ActionRole)
+        copy_button = button_box.addButton(_("Salin Traceback"), QDialogButtonBox.ButtonRole.ActionRole)
         ok_button = button_box.addButton(QDialogButtonBox.StandardButton.Ok)
         copy_button.clicked.connect(self.copy_traceback)
         ok_button.clicked.connect(self.accept)
@@ -48,7 +50,7 @@ class ErrorDialog(QDialog):
 
     def copy_traceback(self):
         QApplication.clipboard().setText(self.error_traceback)
-        QMessageBox.information(self, "Traceback Disalin", "Detail error traceback telah disalin ke clipboard.")
+        QMessageBox.information(self, _("Traceback Disalin"), _("Detail error traceback telah disalin ke clipboard."))
 
 def global_exception_hook(exctype, value, tb):
     traceback_details = "".join(traceback.format_exception(exctype, value, tb))
@@ -78,21 +80,58 @@ def get_js_runtime_options():
     
     qjs_path = next((p for p in qjs_candidates if os.path.isfile(p)), None)
     
-    # Build runtimes dict
-    runtimes_dict = {
-        'deno': {},
-        'node': {},
-        'bun': {},
-        'quickjs': {}
-    }
-    
+    # Build runtimes dict (hanya runtime yang benar-benar tersedia).
+    runtimes_dict = {}
+    if shutil.which("node"):
+        runtimes_dict['node'] = {}
+    if shutil.which("deno"):
+        runtimes_dict['deno'] = {}
+    if shutil.which("bun"):
+        runtimes_dict['bun'] = {}
     if qjs_path:
         runtimes_dict['quickjs'] = {'path': qjs_path}
-    
-    return {
-        'remote_components': ['ejs:github'],
-        'js_runtimes': runtimes_dict
-    }
+
+    opts = {}
+    if runtimes_dict:
+        opts['js_runtimes'] = runtimes_dict
+
+    # Jika paket lokal yt-dlp-ejs belum ada, fallback ke remote components dari GitHub.
+    if importlib.util.find_spec("yt_dlp_ejs") is None:
+        opts['remote_components'] = ['ejs:github']
+    return opts
+
+def classify_yt_dlp_error(error_text):
+    """Kembalikan pesan yang lebih actionable untuk error yt-dlp umum."""
+    if not error_text:
+        return None
+
+    msg = str(error_text)
+    low = msg.lower()
+
+    if "failed to resolve" in low or "getaddrinfo failed" in low:
+        return (
+            "DNS gagal resolve youtube.com. Cek koneksi internet/DNS, "
+            "lalu coba lagi (mis. ganti DNS ke 1.1.1.1 atau 8.8.8.8)."
+        )
+
+    if (
+        "challenge solving failed" in low
+        or "signature solving failed" in low
+        or "n challenge solving failed" in low
+        or "[jsc]" in low
+    ):
+        return (
+            "Gagal menyelesaikan JavaScript challenge YouTube. "
+            "Pastikan yt-dlp terbaru, yt-dlp-ejs terpasang, dan runtime Node.js tersedia."
+        )
+
+    if "403 forbidden" in low and "youtube" in low:
+        return (
+            "YouTube menolak akses format (403). Biasanya terkait challenge/signature atau cookies. "
+            "Coba update yt-dlp, aktifkan cookies browser/file, lalu ulangi."
+        )
+
+    return None
 
 def get_qjs_executable_path():
     """Mengembalikan path di mana qjs.exe seharusnya berada."""
@@ -110,9 +149,9 @@ def download_qjs(parent=None):
     qjs_url = "https://github.com/quickjs-ng/quickjs/releases/download/v0.9.0/qjs-windows-x86_64.exe"
     target_path = get_qjs_executable_path()
     
-    progress = QProgressDialog("Mengunduh QuickJS Runtime...", "Batal", 0, 100, parent)
+    progress = QProgressDialog(_("Mengunduh QuickJS Runtime..."), _("Batal"), 0, 100, parent)
     progress.setWindowModality(Qt.WindowModality.WindowModal)
-    progress.setWindowTitle("Download Dependensi")
+    progress.setWindowTitle(_("Download Dependensi"))
     progress.show()
 
     try:
@@ -140,7 +179,8 @@ def download_qjs(parent=None):
         return True
     except Exception as e:
         dprint(f"Gagal mendownload QuickJS: {e}")
-        QMessageBox.critical(parent, "Download Error", f"Gagal mendownload QuickJS:\n{e}")
+        _msg = _("Gagal mendownload QuickJS:")
+        QMessageBox.critical(parent, _("Download Error"), f"{_msg}\n{e}")
         if os.path.exists(target_path): os.remove(target_path)
         return False
 
@@ -150,24 +190,24 @@ def ensure_qjs_installed(parent=None):
         return True
     
     msg = (
-        "QuickJS JavaScript Runtime tidak ditemukan.\n\n"
-        "Runtime ini diperlukan agar download dari YouTube berjalan lancar (bypass JavaScript challenge).\n"
-        "Apakah Anda ingin mendownloadnya secara otomatis sekarang (ukuran ~1MB)?"
+        _("QuickJS JavaScript Runtime tidak ditemukan.") + "\n\n"
+        + _("Runtime ini diperlukan agar download dari YouTube berjalan lancar (bypass JavaScript challenge).") + "\n"
+        + _("Apakah Anda ingin mendownloadnya secara otomatis sekarang (ukuran ~1MB)?")
     )
     
     reply = QMessageBox.question(
-        parent, "QuickJS Diperlukan", msg,
+        parent, _("QuickJS Diperlukan"), msg,
         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
     )
     
     if reply == QMessageBox.StandardButton.Yes:
         if download_qjs(parent):
-            QMessageBox.information(parent, "Berhasil", "QuickJS berhasil diinstal. Anda bisa mulai mendownload.")
+            QMessageBox.information(parent, _("Berhasil"), _("QuickJS berhasil diinstal. Anda bisa mulai mendownload."))
             return True
     else:
         QMessageBox.warning(
-            parent, "Peringatan", 
-            "Aplikasi mungkin akan mengalami error saat mengunduh dari YouTube tanpa QuickJS."
+            parent, _("Peringatan"), 
+            _("Aplikasi mungkin akan mengalami error saat mengunduh dari YouTube tanpa QuickJS.")
         )
     
     return False

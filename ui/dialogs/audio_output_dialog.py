@@ -5,7 +5,7 @@ from PySide6.QtMultimedia import QMediaDevices
 class AudioOutputDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Pilih Perangkat Output Audio")
+        self.setWindowTitle(_("Pilih Perangkat Output Audio"))
         self.setModal(True)
         self.setFixedSize(400, 300)
 
@@ -13,18 +13,18 @@ class AudioOutputDialog(QDialog):
 
         layout = QVBoxLayout(self)
 
-        self.label = QLabel("Perangkat Output Audio yang tersedia")
+        self.label = QLabel(_("Perangkat Output Audio yang tersedia"))
         layout.addWidget(self.label)
 
         self.device_list_widget = QListWidget()
         layout.addWidget(self.device_list_widget)
         self.label.setBuddy(self.device_list_widget)
 
-        self.select_button = QPushButton("Pilih")
+        self.select_button = QPushButton(_("Pilih"))
         self.select_button.clicked.connect(self.accept)
         layout.addWidget(self.select_button)
 
-        self.cancel_button = QPushButton("Batal")
+        self.cancel_button = QPushButton(_("Batal"))
         self.cancel_button.clicked.connect(self.reject)
         layout.addWidget(self.cancel_button)
 
@@ -34,7 +34,7 @@ class AudioOutputDialog(QDialog):
         self.device_list_widget.clear()
         default_device = QMediaDevices.defaultAudioOutput()
         if default_device.description():
-            self.device_list_widget.addItem("Perangkat Default")
+            self.device_list_widget.addItem(_("Perangkat Default"))
             self.device_list_widget.item(0).setData(Qt.UserRole, default_device) # Store the actual default device
         
         self.available_devices = QMediaDevices.audioOutputs()

@@ -20,10 +20,10 @@ class MainWindowUpdate:
 
     def initiate_update_check(self, manual_check=True):
         if self.main_window.update_check_thread and self.main_window.update_check_thread.isRunning():
-            if manual_check: QMessageBox.information(self.main_window, "Cek Pembaruan", "Pengecekan pembaruan sedang berjalan.")
+            if manual_check: QMessageBox.information(self.main_window, _("Cek Pembaruan"), _("Pengecekan pembaruan sedang berjalan."))
             return
         if manual_check:
-            self.main_window.set_status_text("Mengecek pembaruan...")
+            self.main_window.set_status_text(_("Mengecek pembaruan..."))
             self.main_window._restore_focus_to_input_after_manual_check = (QApplication.focusWidget() == self.main_window.main_view_widget.input_line_edit)
         else:
             self.main_window._restore_focus_to_input_after_manual_check = False
@@ -39,21 +39,21 @@ class MainWindowUpdate:
     def handle_update_available(self, version_info, manual_check):
         latest_version = version_info.get("latest_version")
         download_url_sfx = version_info.get("download_url_sfx")
-        changelog = version_info.get("changelog", "Tidak ada catatan perubahan.")
-        self.main_window.set_status_text(f"Pembaruan v{latest_version} tersedia.")
+        changelog = version_info.get("changelog", _("Tidak ada catatan perubahan."))
+        self.main_window.set_status_text(f"{_('Pembaruan')} v{latest_version} {_('tersedia.')}")
         msg_box = QMessageBox(self.main_window)
         msg_box.setIcon(QMessageBox.Icon.Information)
-        msg_box.setWindowTitle("Pembaruan Tersedia")
-        msg_box.setText(f"Versi baru (v{latest_version}) tersedia!\nAnda menggunakan v{constants.CURRENT_APP_VERSION}.\n\nCatatan Perubahan:\n{changelog}")
-        msg_box.setInformativeText("Apakah Anda ingin mengunduh dan menginstal pembaruan sekarang?\n\nAplikasi akan ditutup dan updater akan berjalan.")
-        yes_button = msg_box.addButton("Ya, Unduh & Instal", QMessageBox.ButtonRole.YesRole)
-        no_button = msg_box.addButton("Nanti Saja", QMessageBox.ButtonRole.NoRole)
+        msg_box.setWindowTitle(_("Pembaruan Tersedia"))
+        msg_box.setText(f"{_('Versi baru')} (v{latest_version}) {_('tersedia!')}\n{_('Anda menggunakan')} v{constants.CURRENT_APP_VERSION}.\n\n{_('Catatan Perubahan')}:\n{changelog}")
+        msg_box.setInformativeText(_("Apakah Anda ingin mengunduh dan menginstal pembaruan sekarang?\n\nAplikasi akan ditutup dan updater akan berjalan."))
+        yes_button = msg_box.addButton(_("Ya, Unduh & Instal"), QMessageBox.ButtonRole.YesRole)
+        no_button = msg_box.addButton(_("Nanti Saja"), QMessageBox.ButtonRole.NoRole)
         msg_box.setDefaultButton(yes_button)
         msg_box.exec()
         if msg_box.clickedButton() == yes_button:
             self.start_update_download(download_url_sfx)
         else:
-            if manual_check: self.main_window.set_status_text("Pembaruan ditunda oleh pengguna.")
+            if manual_check: self.main_window.set_status_text(_("Pembaruan ditunda oleh pengguna."))
             self.main_window.set_ui_busy_state(False, "update_available_declined")
             self._try_restore_focus_after_manual_check()
 
@@ -61,27 +61,27 @@ class MainWindowUpdate:
         if manual_check:
             self.main_window.set_status_text(message)
             if "lebih baru dari versi yang tersedia di server" in message:
-                QMessageBox.warning(self.main_window, "Cek Pembaruan", message + "\n\nDisarankan untuk tidak melakukan downgrade.")
+                QMessageBox.warning(self.main_window, _("Cek Pembaruan"), message + "\n\n" + _("Disarankan untuk tidak melakukan downgrade."))
             else:
-                QMessageBox.information(self.main_window, "Cek Pembaruan", message)
+                QMessageBox.information(self.main_window, _("Cek Pembaruan"), message)
 
     def handle_update_check_error(self, error_message, manual_check):
         if manual_check:
-            self.main_window.set_status_text(f"Error cek pembaruan: {error_message}")
-            QMessageBox.warning(self.main_window, "Error Cek Pembaruan", error_message)
+            self.main_window.set_status_text(f"{_('Error cek pembaruan')}: {error_message}")
+            QMessageBox.warning(self.main_window, _("Error Cek Pembaruan"), error_message)
         elif "URL info versi belum diatur" in error_message and constants.VERSION_INFO_URL == "URL_GIST_JSON_LO_DISINI":
-             QMessageBox.warning(self.main_window, "Konfigurasi Update", "URL untuk info versi belum diatur di kode.\nSilakan atur konstanta VERSION_INFO_URL.")
+             QMessageBox.warning(self.main_window, _("Konfigurasi Update"), _("URL untuk info versi belum diatur di kode.\nSilakan atur konstanta VERSION_INFO_URL."))
 
     def start_update_download(self, sfx_url):
         if self.main_window.download_update_thread and self.main_window.download_update_thread.isRunning():
-            QMessageBox.information(self.main_window, "Download Update", "Proses download update sudah berjalan.")
+            QMessageBox.information(self.main_window, _("Download Update"), _("Proses download update sudah berjalan."))
             return
         temp_dir = tempfile.gettempdir()
         sfx_filename = os.path.basename(QUrl(sfx_url).path())
         if not sfx_filename or not sfx_filename.lower().endswith((".exe", ".sfx")): sfx_filename = "mrd_downloader_update.sfx.exe"
         self.main_window.sfx_save_path = os.path.join(temp_dir, sfx_filename)
-        self.main_window.update_progress_dialog = QProgressDialog("Mengunduh pembaruan...", "Batal", 0, 100, self.main_window)
-        self.main_window.update_progress_dialog.setWindowTitle("Download Pembaruan")
+        self.main_window.update_progress_dialog = QProgressDialog(_("Mengunduh pembaruan..."), _("Batal"), 0, 100, self.main_window)
+        self.main_window.update_progress_dialog.setWindowTitle(_("Download Pembaruan"))
         self.main_window.update_progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
         self.main_window.update_progress_dialog.setAutoClose(False)
         self.main_window.update_progress_dialog.setAutoReset(False)
@@ -93,7 +93,7 @@ class MainWindowUpdate:
         self.main_window.download_update_thread.finished.connect(self.main_window._on_any_thread_finished)
         self.main_window.update_progress_dialog.canceled.connect(self.cancel_update_download)
         self.main_window.set_ui_busy_state(True, "downloading_update")
-        self.main_window.set_status_text(f"Mengunduh pembaruan dari {sfx_url}...")
+        self.main_window.set_status_text(f"{_('Mengunduh pembaruan dari')} {sfx_url}...")
         self.main_window.update_progress_dialog.show()
 
     def cancel_update_download(self):
@@ -101,8 +101,8 @@ class MainWindowUpdate:
             self.main_window.download_update_thread.stop()
         if self.main_window.update_progress_dialog:
             self.main_window.update_progress_dialog.close()
-        self.main_window.set_status_text("Download pembaruan dibatalkan.")
-        QMessageBox.information(self.main_window, "Download Dibatalkan", "Proses download pembaruan telah dibatalkan.")
+        self.main_window.set_status_text(_("Download pembaruan dibatalkan."))
+        QMessageBox.information(self.main_window, _("Download Dibatalkan"), _("Proses download pembaruan telah dibatalkan."))
 
     def handle_update_download_progress(self, percentage):
         if self.main_window.update_progress_dialog: self.main_window.update_progress_dialog.setValue(percentage)
@@ -115,8 +115,8 @@ class MainWindowUpdate:
                 pass
             self.main_window.update_progress_dialog.setValue(100)
             self.main_window.update_progress_dialog.close()
-        self.main_window.set_status_text("Download pembaruan selesai. Menjalankan updater...")
-        confirm_run = QMessageBox.question(self.main_window, "Download Selesai", f"Pembaruan telah diunduh ke:\n{sfx_path}\n\nAplikasi akan ditutup untuk menjalankan updater.\nLanjutkan?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes)
+        self.main_window.set_status_text(_("Download pembaruan selesai. Menjalankan updater..."))
+        confirm_run = QMessageBox.question(self.main_window, _("Download Selesai"), f"{_('Pembaruan telah diunduh ke')}:\n{sfx_path}\n\n{_('Aplikasi akan ditutup untuk menjalankan updater.')}\n{_('Lanjutkan?')}", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes)
         if confirm_run == QMessageBox.StandardButton.Yes:
             try:
                 if sys.platform != "win32": os.chmod(sfx_path, 0o755)
@@ -124,13 +124,13 @@ class MainWindowUpdate:
                 else: subprocess.Popen([sfx_path])
                 QApplication.instance().quit()
             except Exception as e:
-                QMessageBox.critical(self.main_window, "Gagal Menjalankan Updater", f"Tidak bisa menjalankan file updater:\n{sfx_path}\n\nError: {str(e)}\n\nSilakan jalankan manual.")
-                self.main_window.set_status_text(f"Gagal jalankan updater: {e}")
+                QMessageBox.critical(self.main_window, _("Gagal Menjalankan Updater"), f"{_('Tidak bisa menjalankan file updater')}:\n{sfx_path}\n\n{_('Error')}: {str(e)}\n\n{_('Silakan jalankan manual.')}")
+                self.main_window.set_status_text(f"{_('Gagal jalankan updater')}: {e}")
                 try: webbrowser.open(os.path.dirname(sfx_path))
                 except Exception: pass
         else:
-            self.main_window.set_status_text("Instalasi pembaruan ditunda. File updater ada di folder temporary.")
-            QMessageBox.information(self.main_window, "Instalasi Ditunda", f"File updater ada di:\n{sfx_path}\nAnda bisa menjalankannya manual nanti.")
+            self.main_window.set_status_text(_("Instalasi pembaruan ditunda. File updater ada di folder temporary."))
+            QMessageBox.information(self.main_window, _("Instalasi Ditunda"), f"{_('File updater ada di')}:\n{sfx_path}\n{_('Anda bisa menjalankannya manual nanti.')}")
 
     def handle_update_download_error(self, error_message):
         if self.main_window.update_progress_dialog:
@@ -139,5 +139,5 @@ class MainWindowUpdate:
             except (RuntimeError, TypeError):
                 pass
             self.main_window.update_progress_dialog.close()
-        self.main_window.set_status_text(f"Gagal download update: {error_message}")
-        QMessageBox.critical(self.main_window, "Download Gagal", f"Tidak bisa mengunduh pembaruan:\n{error_message}")
+        self.main_window.set_status_text(f"{_('Gagal download update')}: {error_message}")
+        QMessageBox.critical(self.main_window, _("Download Gagal"), f"{_('Tidak bisa mengunduh pembaruan')}:\n{error_message}")

@@ -23,33 +23,41 @@ class MainWindowSettings:
         self.main_window.settings['debug_mode'] = checked
         self.main_window.save_app_settings()
         if checked:
-            self.main_window.set_status_text("Mode Debug Diaktifkan. Log akan dicetak/disimpan.")
+            self.main_window.set_status_text(_("Mode Debug Diaktifkan. Log akan dicetak/disimpan."))
         else:
-            self.main_window.set_status_text("Mode Debug Dinonaktifkan.")
-        self.main_window.update_window_title_status("Siap")
+            self.main_window.set_status_text(_("Mode Debug Dinonaktifkan."))
+        self.main_window.update_window_title_status(_("Siap"))
 
     def open_debug_log(self):
         if not constants.is_debug_mode() and not os.path.exists(constants.LOG_FILE_PATH):
-            QMessageBox.information(self.main_window, "Mode Debug Nonaktif", "Mode debug saat ini nonaktif dan file log tidak ditemukan.\nAktifkan mode debug dan lakukan beberapa aksi untuk membuat log.")
-            self.main_window.set_status_text("File log tidak ditemukan (mode debug nonaktif).")
+            QMessageBox.information(self.main_window, _("Mode Debug Nonaktif"), _("Mode debug saat ini nonaktif dan file log tidak ditemukan.\nAktifkan mode debug dan lakukan beberapa aksi untuk membuat log."))
+            self.main_window.set_status_text(_("File log tidak ditemukan (mode debug nonaktif)."))
             return
         
         if os.path.exists(constants.LOG_FILE_PATH):
             try:
                 QDesktopServices.openUrl(QUrl.fromLocalFile(constants.LOG_FILE_PATH))
-                self.main_window.set_status_text(f"Membuka file log: {constants.LOG_FILE_PATH}")
+                _m = _("Membuka file log:")
+                self.main_window.set_status_text(f"{_m}: {constants.LOG_FILE_PATH}")
             except Exception as e:
-                QMessageBox.warning(self.main_window, "Gagal Buka Log", f"Tidak dapat membuka file log: {constants.LOG_FILE_PATH}\nError: {str(e)}")
-                self.main_window.set_status_text("Gagal membuka file log.")
+                _m1 = _("Tidak dapat membuka file log:")
+                _m2 = _("Error:")
+                QMessageBox.warning(self.main_window, _("Gagal Buka Log"), f"{_m1}: {constants.LOG_FILE_PATH}\n{_m2}: {str(e)}")
+                self.main_window.set_status_text(_("Gagal membuka file log."))
         else:
-            QMessageBox.information(self.main_window, "Log Tidak Ditemukan", f"File log tidak ditemukan di: {constants.LOG_FILE_PATH}\nLog akan dibuat jika mode debug aktif dan ada aktivitas.")
-            self.main_window.set_status_text("File log belum ada.")
+            _m1 = _("File log tidak ditemukan di:")
+            _m2 = _("Log akan dibuat jika mode debug aktif dan ada aktivitas.")
+            QMessageBox.information(self.main_window, _("Log Tidak Ditemukan"), f"{_m1}: {constants.LOG_FILE_PATH}\n{_m2}")
+            self.main_window.set_status_text(_("File log belum ada."))
 
     def open_current_download_folder(self):
         download_path = self.main_window.settings.get('output_path', '')
         if download_path and os.path.isdir(download_path):
             self.main_window.open_location(download_path)
-            self.main_window.set_status_text(f"Membuka folder unduhan: {download_path}")
+            _m = _("Membuka folder unduhan:")
+            self.main_window.set_status_text(f"{_m}: {download_path}")
         else:
-            QMessageBox.warning(self.main_window, "Folder Tidak Ditemukan", f"Folder unduhan '{download_path}' tidak valid atau tidak ada. Cek pengaturan.")
-            self.main_window.set_status_text("Gagal membuka folder unduhan.")
+            _m1 = _("Folder unduhan")
+            _m2 = _("tidak valid atau tidak ada. Cek pengaturan.")
+            QMessageBox.warning(self.main_window, _("Folder Tidak Ditemukan"), f"{_m1} '{download_path}' {_m2}")
+            self.main_window.set_status_text(_("Gagal membuka folder unduhan."))

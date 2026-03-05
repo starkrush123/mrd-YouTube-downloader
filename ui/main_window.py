@@ -75,9 +75,9 @@ class MainWindow(MainWindowCore):
         self.history_tab = HistoryTab()
         self.ai_panel_widget = AIPanelWidget()
         
-        self.tab_widget.addTab(self.main_view_widget, "Main")
-        self.tab_widget.addTab(self.history_tab, "Riwayat Download")
-        self.tab_widget.addTab(self.ai_panel_widget, "AI Panel")
+        self.tab_widget.addTab(self.main_view_widget, _("Main"))
+        self.tab_widget.addTab(self.history_tab, _("Riwayat Download"))
+        self.tab_widget.addTab(self.ai_panel_widget, _("AI Panel"))
         
         self._create_menu_bar()
         self.main_view_widget.search_type_combo.currentTextChanged.connect(self.events._update_placeholder_text)
@@ -99,7 +99,7 @@ class MainWindow(MainWindowCore):
         self.signal_connector = SignalConnector(self, self.search_handler, self.download_handler, self.player_handler, self.dialog_handler)
         self.signal_connector.connect_signals()
         
-        self.update_window_title_status("Siap")
+        self.update_window_title_status(_("Siap"))
         self.app_settings.apply_theme()
         self.events.init_clipboard_monitor()
         

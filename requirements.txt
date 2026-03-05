@@ -1,7 +1,15 @@
-yt-dlp
-yt-dlp-ejs
-requests
-PySide6
-google-generativeai
-keyring
-ytmusicapi
+# Core runtime dependencies (required)
+yt-dlp[default]>=2025.12.08
+PySide6>=6.7.0
+requests>=2.32.2
+google-generativeai>=0.8.0
+keyring>=25.0.0
+ytmusicapi>=1.8.0
+
+# Translation/build tooling used by scripts (compile_mo.py, generate_translations.py)
+Babel>=2.15.0
+
+# Notes (non-pip runtime tools, installed separately):
+# - ffmpeg : recommended for best merge/convert quality
+# - node.js: recommended JS runtime for yt-dlp EJS challenge solving
+# - aria2c : optional, only for parallel/accelerated downloads

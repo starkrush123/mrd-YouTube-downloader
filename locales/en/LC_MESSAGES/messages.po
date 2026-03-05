@@ -1,0 +1,1290 @@
+# Translation file for mrd YouTube Downloader
+# Language: en (English)
+# Source language: id (Indonesian)
+#
+msgid ""
+msgstr ""
+ "Content-Type: text/plain; charset=UTF-8\n"
+ "Content-Transfer-Encoding: 8bit\n"
+ "Language: en\n"
+ "MIME-Version: 1.0\n"
+
+# ── main_layout.py ──────────────────────────────────────────
+msgid "Tipe:"
+msgstr "Type:"
+
+msgid "Video"
+msgstr "Video"
+
+msgid "Playlist"
+msgstr "Playlist"
+
+msgid "Channel"
+msgstr "Channel"
+
+msgid "Pilih jenis input jika bukan URL pasti"
+msgstr "Select input type if not a direct URL"
+
+msgid "Go!"
+msgstr "Go!"
+
+msgid "Info"
+msgstr "Info"
+
+msgid "Siap. Masukkan URL atau kata kunci."
+msgstr "Ready. Enter a URL or keyword."
+
+# ── menu_bar.py ──────────────────────────────────────────────
+msgid "&File"
+msgstr "&File"
+
+msgid "Buka Folder Unduhan"
+msgstr "Open Download Folder"
+
+msgid "Bersihkan Input"
+msgstr "Clear Input"
+
+msgid "Pengaturan..."
+msgstr "Settings..."
+
+msgid "Keluar"
+msgstr "Exit"
+
+msgid "&Alat"
+msgstr "&Tools"
+
+msgid "Tempel & Proses"
+msgstr "Paste && Process"
+
+msgid "&Bantuan"
+msgstr "&Help"
+
+msgid "Cek Pembaruan..."
+msgstr "Check for Updates..."
+
+msgid "Lihat Log Debug"
+msgstr "View Debug Log"
+
+msgid "Mode Debug"
+msgstr "Debug Mode"
+
+msgid "Tentang Aplikasi..."
+msgstr "About..."
+
+# ── main_window_core.py ──────────────────────────────────────
+msgid "Peringatan"
+msgstr "Warning"
+
+msgid "File yang diperlukan untuk fitur akselerasi download nggak ada. Fitur akan dinonaktifkan"
+msgstr "The file required for download acceleration was not found. The feature will be disabled."
+
+msgid "Siap"
+msgstr "Ready"
+
+msgid "Pengaturan Error"
+msgstr "Settings Error"
+
+msgid "Gagal membuat direktori konfigurasi:"
+msgstr "Failed to create configuration directory:"
+
+msgid "Error:"
+msgstr "Error:"
+
+msgid "Pengaturan tidak akan dimuat/disimpan."
+msgstr "Settings will not be loaded/saved."
+
+msgid "Gagal muat pengaturan dari"
+msgstr "Failed to load settings from"
+
+msgid "Pakai default."
+msgstr "Using defaults."
+
+msgid "Gagal Simpan Pengaturan"
+msgstr "Failed to Save Settings"
+
+msgid "Gagal simpan ke"
+msgstr "Failed to save to"
+
+msgid "Lokasi Tidak Ditemukan"
+msgstr "Location Not Found"
+
+msgid "Path tidak valid:"
+msgstr "Invalid path:"
+
+msgid "Gagal Buka Lokasi"
+msgstr "Failed to Open Location"
+
+msgid "Tidak dapat membuka:"
+msgstr "Cannot open:"
+
+# ── settings_dialog.py ───────────────────────────────────────
+msgid "Pengaturan Aplikasi"
+msgstr "Application Settings"
+
+msgid "Pilih Folder..."
+msgstr "Choose Folder..."
+
+msgid "Simpan ke:"
+msgstr "Save to:"
+
+msgid "Bahasa / Language:"
+msgstr "Language:"
+
+msgid "Tema Aplikasi:"
+msgstr "Application Theme:"
+
+msgid "Pilih Perangkat Output Audio"
+msgstr "Select Audio Output Device"
+
+msgid "Audio Output:"
+msgstr "Audio Output:"
+
+msgid "Pantau Clipboard untuk URL YouTube"
+msgstr "Monitor Clipboard for YouTube URLs"
+
+msgid "Tampilkan Notifikasi Selesai Unduh"
+msgstr "Show Download Completion Notification"
+
+msgid "&Umum"
+msgstr "&General"
+
+msgid "Format Video Default:"
+msgstr "Default Video Format:"
+
+msgid "Format Audio Default:"
+msgstr "Default Audio Format:"
+
+msgid "Sematkan Thumbnail & Metadata (Audio)"
+msgstr "Embed Thumbnail & Metadata (Audio)"
+
+msgid "Gunakan akselerasi pararel (aria2c)"
+msgstr "Use parallel acceleration (aria2c)"
+
+msgid "Dapat mempercepat unduhan secara signifikan. Membutuhkan aria2c."
+msgstr "Can significantly speed up downloads. Requires aria2c."
+
+msgid "Jumlah Hasil Pencarian:"
+msgstr "Number of Search Results:"
+
+msgid "Aksi Dobel Klik:"
+msgstr "Double-Click Action:"
+
+msgid "&Unduhan"
+msgstr "&Downloads"
+
+msgid "Balik Shortcut Putar (Enter / Ctrl+Enter)"
+msgstr "Invert Playback Shortcuts (Enter / Ctrl+Enter)"
+
+msgid "Jika aktif, Enter untuk memutar video dan Ctrl+Enter untuk memutar audio."
+msgstr "If active, Enter plays video and Ctrl+Enter plays audio."
+
+msgid "Otomatis putar item berikutnya"
+msgstr "Auto-play next item"
+
+msgid "&Pintasan"
+msgstr "&Shortcuts"
+
+msgid "Autentikasi YouTube (Cookies)"
+msgstr "YouTube Authentication (Cookies)"
+
+msgid "Tidak Ada"
+msgstr "None"
+
+msgid "Import dari Browser"
+msgstr "Import from Browser"
+
+msgid "File Netscape Cookies (.txt)"
+msgstr "Netscape Cookies File (.txt)"
+
+msgid "Sumber Cookies:"
+msgstr "Cookie Source:"
+
+msgid "Browser:"
+msgstr "Browser:"
+
+msgid "Path File:"
+msgstr "File Path:"
+
+msgid "Pilih..."
+msgstr "Choose..."
+
+msgid "Kunci API Gemini:"
+msgstr "Gemini API Key:"
+
+msgid "Kemampuan AI"
+msgstr "AI Capabilities"
+
+msgid "Fitur AI:"
+msgstr "AI Feature:"
+
+msgid "&Akun && AI"
+msgstr "&Account && AI"
+
+msgid "Komponen Tidak Ditemukan"
+msgstr "Component Not Found"
+
+msgid "aria2c tidak ditemukan di sistem. Fitur ini dimatikan."
+msgstr "aria2c not found on this system. Feature disabled."
+
+msgid "Pilih Folder Penyimpanan"
+msgstr "Select Save Folder"
+
+msgid "Pilih File Cookies"
+msgstr "Select Cookies File"
+
+msgid "Perangkat Audio"
+msgstr "Audio Device"
+
+msgid "Perangkat output audio berhasil disimpan."
+msgstr "Audio output device saved successfully."
+
+msgid "Tidak ada perangkat output audio yang dipilih."
+msgstr "No audio output device selected."
+
+msgid "Restart Diperlukan"
+msgstr "Restart Required"
+
+msgid "Bahasa telah diubah. Silakan restart aplikasi agar perubahan diterapkan sepenuhnya."
+msgstr "Language changed. Please restart the application for the changes to take effect."
+
+# ── helpers.py ───────────────────────────────────────────────
+msgid "Terjadi Kesalahan Fatal"
+msgstr "A Fatal Error Occurred"
+
+msgid "Aplikasi mengalami kesalahan yang tidak terduga.\nBerikut adalah detail traceback:"
+msgstr "The application encountered an unexpected error.\nHere are the traceback details:"
+
+msgid "Salin Traceback"
+msgstr "Copy Traceback"
+
+msgid "Traceback Disalin"
+msgstr "Traceback Copied"
+
+msgid "Detail error traceback telah disalin ke clipboard."
+msgstr "Error traceback details have been copied to clipboard."
+
+msgid "Mengunduh QuickJS Runtime..."
+msgstr "Downloading QuickJS Runtime..."
+
+msgid "Batal"
+msgstr "Cancel"
+
+msgid "Download Dependensi"
+msgstr "Download Dependencies"
+
+msgid "Gagal mendownload QuickJS:"
+msgstr "Failed to download QuickJS:"
+
+msgid "Download Error"
+msgstr "Download Error"
+
+msgid "QuickJS JavaScript Runtime tidak ditemukan."
+msgstr "QuickJS JavaScript Runtime not found."
+
+msgid "Runtime ini diperlukan agar download dari YouTube berjalan lancar (bypass JavaScript challenge)."
+msgstr "This runtime is required for YouTube downloads to work properly (bypass JavaScript challenge)."
+
+msgid "Apakah Anda ingin mendownloadnya secara otomatis sekarang (ukuran ~1MB)?"
+msgstr "Would you like to download it automatically now (~1MB)?"
+
+msgid "QuickJS Diperlukan"
+msgstr "QuickJS Required"
+
+msgid "Berhasil"
+msgstr "Success"
+
+msgid "QuickJS berhasil diinstal. Anda bisa mulai mendownload."
+msgstr "QuickJS installed successfully. You can now start downloading."
+
+msgid "Aplikasi mungkin akan mengalami error saat mengunduh dari YouTube tanpa QuickJS."
+msgstr "The application may encounter errors when downloading from YouTube without QuickJS."
+
+msgid "Video (MP4 - Kualitas Terbaik)"
+msgstr "Video (MP4 - Best Quality)"
+
+msgid "Audio (MP3 - Kualitas Terbaik)"
+msgstr "Audio (MP3 - Best Quality)"
+
+msgid "5 detik"
+msgstr "5 seconds"
+
+msgid "Light"
+msgstr "Light"
+
+msgid "Memuat Playlist"
+msgstr "Loading Playlist"
+
+msgid "mencari"
+msgstr "searching"
+
+msgid "gagal"
+msgstr "failed"
+
+msgid "memuat"
+msgstr "loading"
+
+msgid "isi"
+msgstr "contents"
+
+msgid "mengunduh"
+msgstr "downloading"
+
+msgid "batch"
+msgstr "batch"
+
+msgid "memutar"
+msgstr "playing"
+
+msgid "dijeda"
+msgstr "paused"
+
+msgid "Ditemukan {count} playlist."
+msgstr "Found {count} playlists."
+
+msgid "Menampilkan {current} dari {total} playlist."
+msgstr "Showing {current} of {total} playlists."
+
+msgid "{status} Dobel klik untuk melihat isi playlist."
+msgstr "{status} Double-click to view playlist contents."
+
+msgid "Ditemukan {count} video."
+msgstr "Found {count} videos."
+
+msgid "Menampilkan {current} dari {total} video."
+msgstr "Showing {current} of {total} videos."
+
+msgid "{status} Dobel klik untuk: {action}."
+msgstr "{status} Double-click to: {action}."
+
+msgid "Dark"
+msgstr "Dark"
+
+msgid "Video (MKV - Kualitas Terbaik)"
+msgstr "Video (MKV - Best Quality)"
+
+msgid "Video (WEBM - Kualitas Terbaik)"
+msgstr "Video (WEBM - Best Quality)"
+
+msgid "Video (AVI - Kompatibilitas)"
+msgstr "Video (AVI - Compatibility)"
+
+msgid "Audio (WAV - Tanpa Kompresi)"
+msgstr "Audio (WAV - Uncompressed)"
+
+msgid "Audio (AAC - Kualitas Baik)"
+msgstr "Audio (AAC - Good Quality)"
+
+msgid "Audio (OGG Vorbis - Open Source)"
+msgstr "Audio (OGG Vorbis - Open Source)"
+
+msgid "Audio (FLAC - Lossless)"
+msgstr "Audio (FLAC - Lossless)"
+
+msgid "Text Files (*.txt);;All Files (*)"
+msgstr "Text Files (*.txt);;All Files (*)"
+
+msgid "Mulai unduh {kind}: {title}..."
+msgstr "Starting {kind} download: {title}..."
+
+msgid "Mengunduh {kind} ({title})"
+msgstr "Downloading {kind} ({title})"
+
+msgid "Batch ({kind}): {title}..."
+msgstr "Batch ({kind}): {title}..."
+
+msgid "Mulai batch ({kind}): {title} ({count} item)..."
+msgstr "Starting batch ({kind}): {title} ({count} items)..."
+
+msgid "Batch Unduh ({kind}) ({title})"
+msgstr "Batch Download ({kind}) ({title})"
+
+msgid "Batalkan {op}?"
+msgstr "Cancel {op}?"
+
+msgid "Apakah Anda yakin ingin membatalkan {op} yang sedang berjalan?"
+msgstr "Are you sure you want to cancel the ongoing {op}?"
+
+msgid "Mencoba membatalkan {op}..."
+msgstr "Trying to cancel {op}..."
+
+msgid "Membatalkan {op}"
+msgstr "Cancelling {op}"
+
+msgid "Membatalkan..."
+msgstr "Cancelling..."
+
+msgid "Batch selesai."
+msgstr "Batch completed."
+
+msgid "Batch Unduhan {status}"
+msgstr "Batch Download {status}"
+
+msgid "{kind} {state}: {message}"
+msgstr "{kind} {state}: {message}"
+
+msgid "Unduhan {kind} {state}"
+msgstr "{kind} Download {state}"
+
+msgid "File \"{name}\" berhasil diunduh."
+msgstr "File \"{name}\" was downloaded successfully."
+
+msgid "Disimpan di: {path}"
+msgstr "Saved to: {path}"
+
+msgid "Unduhan {kind} Gagal.\n\nError: {message}"
+msgstr "{kind} download failed.\n\nError: {message}"
+
+msgid "Perangkat audio tersimpan tidak ditemukan atau tidak valid, mencoba menggunakan default."
+msgstr "Saved audio device was not found or is invalid, trying default device."
+
+msgid "Perangkat output audio diubah ke: {device}"
+msgstr "Audio output device changed to: {device}"
+
+msgid "Perangkat audio tersimpan tidak ditemukan atau tidak valid, menggunakan default: {device}."
+msgstr "Saved audio device was not found or is invalid, using default: {device}."
+
+msgid "Tidak dapat menemukan perangkat audio yang valid, bahkan perangkat default."
+msgstr "Could not find a valid audio device, including the default device."
+
+msgid "Audio Aktif: {title}"
+msgstr "Audio Active: {title}"
+
+msgid "Memutar Audio ({title})"
+msgstr "Playing Audio ({title})"
+
+msgid "Video Aktif: {title}"
+msgstr "Video Active: {title}"
+
+msgid "Memutar Video ({title})"
+msgstr "Playing Video ({title})"
+
+msgid "Audio Dijeda: {title}"
+msgstr "Audio Paused: {title}"
+
+msgid "Audio Dijeda ({title})"
+msgstr "Audio Paused ({title})"
+
+msgid "Video Dijeda: {title}"
+msgstr "Video Paused: {title}"
+
+msgid "Video Dijeda ({title})"
+msgstr "Video Paused ({title})"
+
+msgid "Mengambil info stream: {title}..."
+msgstr "Fetching stream info: {title}..."
+
+msgid "kecepatan pemutar {rate}"
+msgstr "player speed {rate}"
+
+msgid "Kecepatan pemutar diatur ke {rate}x"
+msgstr "Player speed set to {rate}x"
+
+msgid "Video Berikutnya"
+msgstr "Next Video"
+
+msgid "Memutar otomatis selanjutnya: {title}"
+msgstr "Auto-playing next: {title}"
+
+msgid "Autoplay pintar aktif: ditambahkan {count} lagu relevan dari '{title}'."
+msgstr "Smart autoplay enabled: added {count} relevant songs from '{title}'."
+
+msgid "Menunggu rekomendasi lagu berikutnya..."
+msgstr "Waiting for next song recommendations..."
+
+# ── main_window_settings.py ──────────────────────────────────
+msgid "Mode Debug Diaktifkan. Log akan dicetak/disimpan."
+msgstr "Debug Mode Enabled. Logs will be printed/saved."
+
+msgid "Mode Debug Dinonaktifkan."
+msgstr "Debug Mode Disabled."
+
+msgid "Mode Debug Nonaktif"
+msgstr "Debug Mode Inactive"
+
+msgid "Mode debug saat ini nonaktif dan file log tidak ditemukan.\nAktifkan mode debug dan lakukan beberapa aksi untuk membuat log."
+msgstr "Debug mode is currently inactive and no log file was found.\nEnable debug mode and perform some actions to create a log."
+
+msgid "File log tidak ditemukan (mode debug nonaktif)."
+msgstr "Log file not found (debug mode inactive)."
+
+msgid "Membuka file log:"
+msgstr "Opening log file:"
+
+msgid "Gagal Buka Log"
+msgstr "Failed to Open Log"
+
+msgid "Tidak dapat membuka file log:"
+msgstr "Cannot open log file:"
+
+msgid "Gagal membuka file log."
+msgstr "Failed to open log file."
+
+msgid "Log Tidak Ditemukan"
+msgstr "Log Not Found"
+
+msgid "File log tidak ditemukan di:"
+msgstr "Log file not found at:"
+
+msgid "Log akan dibuat jika mode debug aktif dan ada aktivitas."
+msgstr "Log will be created when debug mode is active and there is activity."
+
+msgid "File log belum ada."
+msgstr "Log file does not exist yet."
+
+msgid "Membuka folder unduhan:"
+msgstr "Opening download folder:"
+
+msgid "Folder Tidak Ditemukan"
+msgstr "Folder Not Found"
+
+msgid "Folder unduhan"
+msgstr "Download folder"
+
+msgid "tidak valid atau tidak ada. Cek pengaturan."
+msgstr "is invalid or does not exist. Check settings."
+
+msgid "Gagal membuka folder unduhan."
+msgstr "Failed to open download folder."
+
+msgid "<b>mrd YouTube Downloader</b>"
+msgstr "<b>mrd YouTube Downloader</b>"
+
+msgid "AI Panel"
+msgstr "AI Panel"
+
+msgid "Aksi Default Tidak Diketahui"
+msgstr "Unknown Default Action"
+
+msgid "Aksi Gagal"
+msgstr "Action Failed"
+
+msgid "Aksi Tidak Sesuai"
+msgstr "Inappropriate Action"
+
+msgid "Aksi dibatalkan."
+msgstr "Action cancelled."
+
+msgid "Aksi tidak diketahui."
+msgstr "Action unknown."
+
+msgid "Anda bisa menjalankannya manual nanti."
+msgstr "You can run it manually later."
+
+msgid "Anda menggunakan"
+msgstr "you use"
+
+msgid "Apa yang ingin Anda lakukan?"
+msgstr "What do you want to do?"
+
+msgid "Apakah Anda ingin mengunduh dan menginstal pembaruan sekarang?\\n\\nAplikasi akan ditutup dan updater akan berjalan."
+msgstr "Do you want to download and install the update now?\\n\\nThe application will close and the updater will run."
+
+msgid "Aplikasi akan ditutup untuk menjalankan updater."
+msgstr "The application will be closed to run the updater."
+
+msgid "Aplikasi untuk mengunduh video dan audio dari YouTube dengan mudah."
+msgstr "Application to easily download videos and audio from YouTube."
+
+msgid "Audio"
+msgstr "Audio"
+
+msgid "Audio Player"
+msgstr "AudioPlayer"
+
+msgid "Audio dari Input"
+msgstr "Audio from Input"
+
+msgid "Batalkan unduhan (Esc)"
+msgstr "Cancel download (Esc)"
+
+msgid "Batch Selesai"
+msgstr "Batches Completed"
+
+msgid "Batch Selesai (Ada Gagal)"
+msgstr "Batch Completed (Failed)"
+
+msgid "Batch Unduhan"
+msgstr "Batch Download"
+
+msgid "Batch unduhan"
+msgstr "Batch download"
+
+msgid "Berhenti"
+msgstr "Stop"
+
+msgid "Buka File"
+msgstr "Open Files"
+
+msgid "Buka Folder"
+msgstr "Open Folder"
+
+msgid "Catatan Perubahan"
+msgstr "Change Notes"
+
+msgid "Cek Pembaruan"
+msgstr "Check for Updates"
+
+msgid "Clipboard Kosong"
+msgstr "Blank Clipboard"
+
+msgid "Clipboard kosong."
+msgstr "Empty clipboard."
+
+msgid "Daftar hasil pencarian atau item playlist"
+msgstr "List of search results or playlist items"
+
+msgid "Data Tidak Lengkap"
+msgstr "Incomplete Data"
+
+msgid "Data item tidak valid atau URL tidak ada."
+msgstr "Invalid item data or missing URL."
+
+msgid "Dialog info aplikasi ditutup."
+msgstr "The application info dialog closes."
+
+msgid "Dibangun menggunakan pustaka yt-dlp untuk fungsionalitas unduhan inti."
+msgstr "Built using the yt-dlp library for core download functionality."
+
+msgid "Dibuat oleh: ridho"
+msgstr "Created by: ridho"
+
+msgid "Dijeda"
+msgstr "Paused"
+
+msgid "Disarankan untuk tidak melakukan downgrade."
+msgstr "It is recommended not to downgrade."
+
+msgid "Dobel Klik"
+msgstr "Double Click"
+
+msgid "Download Dibatalkan"
+msgstr "Download Canceled"
+
+msgid "Download Gagal"
+msgstr "Download Failed"
+
+msgid "Download Pembaruan"
+msgstr "Download Updates"
+
+msgid "Download Selesai"
+msgstr "Download Complete"
+
+msgid "Download Update"
+msgstr "Download Updates"
+
+msgid "Download pembaruan dibatalkan."
+msgstr "Update download cancelled."
+
+msgid "Download pembaruan selesai. Menjalankan updater..."
+msgstr "Update download complete. Running the updater..."
+
+msgid "Durasi"
+msgstr "Duration"
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Error Cek Pembaruan"
+msgstr "Update Check Error"
+
+msgid "Error cek pembaruan"
+msgstr "Update check error"
+
+msgid "File"
+msgstr "Files"
+
+msgid "File akan disimpan di subfolder"
+msgstr "Files will be saved in subfolders"
+
+msgid "File updater ada di"
+msgstr "The updater files are at"
+
+msgid "GUI Framework: PySide6"
+msgstr "GUI Framework: PySide6"
+
+msgid "Gagal"
+msgstr "Fail"
+
+msgid "Gagal Buka"
+msgstr "Failed to Open"
+
+msgid "Gagal Memutar"
+msgstr "Failed to Play"
+
+msgid "Gagal Menjalankan Updater"
+msgstr "Failed to Run Updater"
+
+msgid "Gagal Muat"
+msgstr "Load Failed"
+
+msgid "Gagal Playback"
+msgstr "Playback Failed"
+
+msgid "Gagal Salin"
+msgstr "Copy Failed"
+
+msgid "Gagal Unduh"
+msgstr "Download Failed"
+
+msgid "Gagal download update"
+msgstr "Failed to download update"
+
+msgid "Gagal jalankan updater"
+msgstr "Failed to run updater"
+
+msgid "Gagal playback."
+msgstr "Playback failed."
+
+msgid "Gagal!"
+msgstr "Fail!"
+
+msgid "Hasil Pencarian"
+msgstr "Search Results"
+
+msgid "Hasil Pencarian Playlist"
+msgstr "Playlist Search Results"
+
+msgid "Hasil Pencarian Video"
+msgstr "Video Search Results"
+
+msgid "Hentikan & Tutup"
+msgstr "Stop & Close"
+
+msgid "Hentikan Download Update?"
+msgstr "Stop Downloading Updates?"
+
+msgid "Hentikan Playback?"
+msgstr "Stop Playback?"
+
+msgid "Input Kosong"
+msgstr "Input is Blank"
+
+msgid "Input field dibersihkan."
+msgstr "Input fields are cleared."
+
+msgid "Instalasi Ditunda"
+msgstr "Installation Suspended"
+
+msgid "Instalasi pembaruan ditunda. File updater ada di folder temporary."
+msgstr "Update installation is pending. The updater file is in the temporary folder."
+
+msgid "Isi"
+msgstr "Contents"
+
+msgid "Item Tidak Valid"
+msgstr "Invalid Item"
+
+msgid "Item tidak punya URL valid."
+msgstr "The item does not have a valid URL."
+
+msgid "Item tidak punya data valid."
+msgstr "The item does not have valid data."
+
+msgid "Jeda"
+msgstr "Pause"
+
+msgid "Jeda (Spasi)"
+msgstr "Pause (Space)"
+
+msgid "Judul"
+msgstr "Title"
+
+msgid "Judul Playlist"
+msgstr "Playlist Title"
+
+msgid "Kecepatan"
+msgstr "Speed"
+
+msgid "Kesalahan Cari"
+msgstr "Search Error"
+
+msgid "Kesalahan Media Player"
+msgstr "Media Player Error"
+
+msgid "Kesalahan tidak diketahui"
+msgstr "Unknown error"
+
+msgid "Kirim"
+msgstr "Send"
+
+msgid "Konfigurasi Update"
+msgstr "Update Configuration"
+
+msgid "Konfirmasi Unduh Semua"
+msgstr "Confirm Download All"
+
+msgid "Langsung "
+msgstr "Direct"
+
+msgid "Lanjutkan (Spasi)"
+msgstr "Continue (Space)"
+
+msgid "Lanjutkan?"
+msgstr "Continue?"
+
+msgid "Lihat Isi Playlist"
+msgstr "View Playlist Contents"
+
+msgid "Lihat Isi Playlist (Enter)"
+msgstr "View Playlist Contents (Enter)"
+
+msgid "Lihat Playlist di YouTube"
+msgstr "View Playlists on YouTube"
+
+msgid "Lihat di YouTube"
+msgstr "View on YouTube"
+
+msgid "Lihat video di playlist (Enter atau Dobel Klik)"
+msgstr "View videos in playlist (Enter or Double Click)"
+
+msgid "List"
+msgstr "List"
+
+msgid "Main"
+msgstr "Main"
+
+msgid "Masukkan URL atau kata kunci"
+msgstr "Enter a URL or keyword"
+
+msgid "Masukkan URL atau kata kunci."
+msgstr "Enter a URL or keyword."
+
+msgid "Media"
+msgstr "Media"
+
+msgid "Memuat"
+msgstr "Load"
+
+msgid "Memuat Channel"
+msgstr "Loading Channels"
+
+msgid "Memuat Info..."
+msgstr "Loading Info..."
+
+msgid "Memuat Isi Playlist"
+msgstr "Loading Playlist Contents"
+
+msgid "Memuat audio..."
+msgstr "Loading audio..."
+
+msgid "Memuat hasil..."
+msgstr "Loading results..."
+
+msgid "Video Tanpa Judul"
+msgstr "Untitled Video"
+
+msgid "Autoplay Pintar YouTube (rekomendasi lagu terkait)"
+msgstr "Smart YouTube Autoplay (related song recommendations)"
+
+msgid "Saat memutar dari YouTube, otomatis menambahkan antrean lagu yang relevan."
+msgstr "When playing from YouTube, automatically adds a queue of relevant songs."
+
+msgid "Batas jumlah lagu rekomendasi yang ditambahkan ke antrean autoplay."
+msgstr "Limit the number of recommended songs added to the autoplay queue."
+
+msgid "Jumlah lagu rekomendasi maksimum:"
+msgstr "Maximum recommended songs:"
+
+msgid "Memuat item dari playlist"
+msgstr "Load items from a playlist"
+
+msgid "Memuat item..."
+msgstr "Loading items..."
+
+msgid "Memuat video dari channel"
+msgstr "Loading videos from channels"
+
+msgid "Memulai unduhan..."
+msgstr "Starting download..."
+
+msgid "Memulai..."
+msgstr "Start..."
+
+msgid "Memutar"
+msgstr "Twisted"
+
+msgid "Menampilkan hasil awal"
+msgstr "Displays initial results"
+
+msgid "Mencari"
+msgstr "Look for"
+
+msgid "Mengambil Info Stream"
+msgstr "Retrieving Stream Info"
+
+msgid "Mengecek pembaruan..."
+msgstr "Checking for updates..."
+
+msgid "Mengonversi..."
+msgstr "Converting..."
+
+msgid "Mengunduh"
+msgstr "Downloading"
+
+msgid "Mengunduh pembaruan dari"
+msgstr "Downloading updates from"
+
+msgid "Mengunduh pembaruan..."
+msgstr "Downloading updates..."
+
+msgid "Menutup aplikasi, membersihkan..."
+msgstr "Closing apps, cleaning..."
+
+msgid "Mulai Unduh"
+msgstr "Start Download"
+
+msgid "Nanti Saja"
+msgstr "Later"
+
+msgid "Operasi Berjalan"
+msgstr "Ongoing Operations"
+
+msgid "Operasi unduhan telah selesai atau dihentikan."
+msgstr "The download operation has completed or stopped."
+
+msgid "Pembaruan"
+msgstr "Update"
+
+msgid "Pembaruan Tersedia"
+msgstr "Update Available"
+
+msgid "Pembaruan ditunda oleh pengguna."
+msgstr "Update delayed by user."
+
+msgid "Pembaruan telah diunduh ke"
+msgstr "The update has been downloaded to"
+
+msgid "Pemutar Audio"
+msgstr "Audio Player"
+
+msgid "Pencarian selesai. Ditemukan total"
+msgstr "Search complete. Totally found"
+
+msgid "Pengaturan disimpan dan diterapkan."
+msgstr "Settings are saved and applied."
+
+msgid "Pengecekan pembaruan sedang berjalan."
+msgstr "Update check is running."
+
+msgid "Perangkat Default"
+msgstr "Default Device"
+
+msgid "Perangkat Output Audio yang tersedia"
+msgstr "Available Audio Output Devices"
+
+msgid "Perintah AI:"
+msgstr "AI Command:"
+
+msgid "Pilih"
+msgstr "Choose"
+
+msgid "Pilih item dari daftar untuk diputar sebagai audio."
+msgstr "Select an item from the list to play as audio."
+
+msgid "Pilih item dari daftar untuk diputar sebagai video."
+msgstr "Select an item from the list to play as a video."
+
+msgid "Pilih playlist dari daftar."
+msgstr "Select a playlist from the list."
+
+msgid "Pilih playlist valid."
+msgstr "Select a valid playlist."
+
+msgid "Pilih video dari daftar untuk diunduh sebagai audio."
+msgstr "Select a video from the list to download as audio."
+
+msgid "Pilih video dari daftar untuk diunduh sebagai video."
+msgstr "Select a video from the list to download as a video."
+
+msgid "Pilih video dari daftar."
+msgstr "Select a video from the list."
+
+msgid "Pilihan Playlist"
+msgstr "Playlist Options"
+
+msgid "Pilihan Salah"
+msgstr "Wrong Choice"
+
+msgid "Playback berhenti/selesai."
+msgstr "Playback stops/finished."
+
+msgid "Playlist Tanpa Judul"
+msgstr "Untitled Playlist"
+
+msgid "Proses download pembaruan telah dibatalkan."
+msgstr "The update download process has been cancelled."
+
+msgid "Proses download update sudah berjalan."
+msgstr "The update download process is already underway."
+
+msgid "Putar"
+msgstr "Spin"
+
+msgid "Putar Audio"
+msgstr "Play Audio"
+
+msgid "Putar Audio Saja"
+msgstr "Play Audio Only"
+
+msgid "Putar Video"
+msgstr "Play Video"
+
+msgid "Putar audio"
+msgstr "Play audio"
+
+msgid "Putar video"
+msgstr "Play video"
+
+msgid "Riwayat Download"
+msgstr "Download History"
+
+msgid "Salin URL Playlist"
+msgstr "Copy Playlist URL"
+
+msgid "Salin URL Video"
+msgstr "Copy Video URL"
+
+msgid "Satu unduhan (mungkin batch lain) sudah jalan."
+msgstr "One download (perhaps another batch) is underway."
+
+msgid "Satu unduhan sudah berjalan. Harap tunggu atau hentikan."
+msgstr "One download is already underway. Please wait or stop."
+
+msgid "Selesai"
+msgstr "Finished"
+
+msgid "Selesai!"
+msgstr "Finished!"
+
+msgid "Selesaikan atau hentikan operasi lain sebelum memulai unduhan."
+msgstr "Complete or stop other operations before starting the download."
+
+msgid "Selesaikan operasi lain."
+msgstr "Complete another operation."
+
+msgid "Silakan jalankan manual."
+msgstr "Please run manually."
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Tanggal Download"
+msgstr "Download Date"
+
+msgid "Tanpa Judul"
+msgstr "Without title"
+
+msgid "Teks dari clipboard ditempel"
+msgstr "The text from the clipboard is pasted"
+
+msgid "Tentang mrd YouTube Downloader"
+msgstr "About mrd YouTube Downloader"
+
+msgid "Tidak Ada Item"
+msgstr "No Items"
+
+msgid "Tidak Ada Pilihan"
+msgstr "No choice"
+
+msgid "Tidak ada aksi default yang cocok untuk tipe item"
+msgstr "There is no matching default action for the item type"
+
+msgid "Tidak ada catatan perubahan."
+msgstr "There is no change record."
+
+msgid "Tidak ada informasi URL yang tersimpan untuk media yang sedang diputar."
+msgstr "No URL information is stored for the currently playing media."
+
+msgid "Tidak ada operasi aktif yang bisa dihentikan saat ini."
+msgstr "There are no active operations that can be stopped at this time."
+
+msgid "Tidak ada teks di clipboard untuk ditempel."
+msgstr "There is no text on the clipboard to paste."
+
+msgid "Tidak ada video untuk diunduh dari list ini."
+msgstr "There are no videos to download from this list."
+
+msgid "Tidak bisa dapat info stream"
+msgstr "Can't get stream info"
+
+msgid "Tidak bisa mengunduh pembaruan"
+msgstr "Cannot download update"
+
+msgid "Tidak bisa menjalankan file updater"
+msgstr "Cannot run updater file"
+
+msgid "Tidak dapat memulai unduhan batch."
+msgstr "Unable to start batch download."
+
+msgid "Tunggu atau hentikan operasi aktif sebelum buka pengaturan."
+msgstr "Wait or stop active operations before opening settings."
+
+msgid "Tunggu atau hentikan operasi aktif sebelum membuka info aplikasi."
+msgstr "Wait or stop the active operation before opening the app info."
+
+msgid "URL"
+msgstr "URLs"
+
+msgid "URL / Kata Kunci"
+msgstr "URL / Keyword"
+
+msgid "URL Channel Terdeteksi"
+msgstr "Channel URL Detected"
+
+msgid "URL Playlist Terdeteksi"
+msgstr "Playlist URL Detected"
+
+msgid "URL Video Terdeteksi"
+msgstr "Video URL Detected"
+
+msgid "URL tidak valid."
+msgstr "Invalid URL."
+
+msgid "URL untuk info versi belum diatur di kode.\\nSilakan atur konstanta VERSION_INFO_URL."
+msgstr "The URL for version info has not been set in the code.\\nPlease set the VERSION_INFO_URL constant."
+
+msgid "URL video YouTube yang valid diperlukan."
+msgstr "A valid YouTube video URL is required."
+
+msgid "URL video terdeteksi"
+msgstr "Video URL detected"
+
+msgid "Unduh"
+msgstr "Download"
+
+msgid "Unduh Audio"
+msgstr "Download Audio"
+
+msgid "Unduh Audio Ini (Ctrl+D)"
+msgstr "Download This Audio (Ctrl+D)"
+
+msgid "Unduh Semua Audio"
+msgstr "Download All Audio"
+
+msgid "Unduh Semua Video"
+msgstr "Download All Videos"
+
+msgid "Unduh Video"
+msgstr "Download Videos"
+
+msgid "Unduh Video Ini (Ctrl+Shift+D)"
+msgstr "Download This Video (Ctrl+Shift+D)"
+
+msgid "Unduh sebagai audio (Ctrl+D)"
+msgstr "Download as audio (Ctrl+D)"
+
+msgid "Unduh sebagai video (Ctrl+Shift+D)"
+msgstr "Download as video (Ctrl+Shift+D)"
+
+msgid "Unduh semua"
+msgstr "Download all"
+
+msgid "Unduhan"
+msgstr "Downloads"
+
+msgid "Unduhan Berjalan"
+msgstr "Download Running"
+
+msgid "Unduhan batch dibatalkan."
+msgstr "Batch download cancelled."
+
+msgid "Unknown Title"
+msgstr "Unknown Title"
+
+msgid "Versi Aplikasi"
+msgstr "Application Version"
+
+msgid "Versi Python"
+msgstr "Python Version"
+
+msgid "Versi Qt"
+msgstr "Qt version"
+
+msgid "Versi baru"
+msgstr "New version"
+
+msgid "Versi yt-dlp"
+msgstr "yt-dlp version"
+
+msgid "Video Player"
+msgstr "Video player"
+
+msgid "Video dari Input"
+msgstr "Video from Input"
+
+msgid "Video dari URL"
+msgstr "Video from URL"
+
+msgid "Ya, Unduh & Instal"
+msgstr "Yes, Download & Install"
+
+msgid "Yakin hentikan download pembaruan?"
+msgstr "Are you sure you stopped downloading updates?"
+
+msgid "Yakin hentikan playback saat ini?"
+msgstr "Are you sure you should stop playback at this time?"
+
+msgid "berisi"
+msgstr "containing"
+
+msgid "dengan pengaturan"
+msgstr "with settings"
+
+msgid "dikenali sebagai channel. Akan menampilkan 100 video terbaru."
+msgstr "recognized as a channel. Will display the 100 newest videos."
+
+msgid "dikenali sebagai playlist. Akan menampilkan isinya."
+msgstr "recognized as a playlist. Will display the contents."
+
+msgid "hasil"
+msgstr "results"
+
+msgid "item"
+msgstr "items"
+
+msgid "item dari"
+msgstr "items from"
+
+msgid "kosong atau tidak berisi video yang dapat diakses."
+msgstr "is empty or contains no accessible videos."
+
+msgid "playlist"
+msgstr "playlists"
+
+msgid "sebagai"
+msgstr "as"
+
+msgid "sebagai audio."
+msgstr "as audio."
+
+msgid "sebagai video."
+msgstr "as a video."
+
+msgid "tersedia!"
+msgstr "available!"
+
+msgid "tersedia."
+msgstr "available."
+
+msgid "untuk"
+msgstr "For"
+
+msgid "video"
+msgstr "videos"
+
+msgid "video dari"
+msgstr "videos from"
+msgid "Apakah Anda ingin mengunduh dan menginstal pembaruan sekarang?\n\nAplikasi akan ditutup dan updater akan berjalan."
+msgstr "Do you want to download and install the update now?\n\nThe application will close and the updater will run."
+
+msgid "URL untuk info versi belum diatur di kode.\nSilakan atur konstanta VERSION_INFO_URL."
+msgstr "The version info URL has not been configured in the source code.\nPlease set the VERSION_INFO_URL constant."
+
+msgid "Volume pemutar: {percent}%"
+msgstr "Player volume: {percent}%"
+
+msgid "Koneksi stream terganggu. Mencoba menyambung ulang ({attempt}/{total})..."
+msgstr "Stream connection interrupted. Reconnecting ({attempt}/{total})..."
+
+msgid "Stream gagal dipulihkan. Melanjutkan ke item berikutnya..."
+msgstr "Stream recovery failed. Continuing to the next item..."

@@ -39,13 +39,17 @@ class MainWindowCore(QMainWindow):
         self._is_initial_startup_check = True
         self.last_clipboard_text = ""
         self.stream_info_thread = None
+        self.related_fetch_thread = None
         self.download_thread = None
         self.search_thread = None
         self.playlist_fetch_thread = None
         self.channel_fetch_thread = None
+        self.is_fetching_related = False
+        self.related_seed_url = None
+        self.current_results_context = "none"
         self._status_reset_timer = QTimer(self)
         self._status_reset_timer.setSingleShot(True)
-        self._status_reset_timer.timeout.connect(lambda: self.main_view_widget.status_label.setText("Siap"))
+        self._status_reset_timer.timeout.connect(lambda: self.main_view_widget.status_label.setText(_("Siap")))
 
         self.setWindowTitle(self.BASE_TITLE)
         self.set_initial_window_geometry()
@@ -57,32 +61,36 @@ class MainWindowCore(QMainWindow):
         
         self.default_settings = {
             'output_path': default_music_path,
-            'video_format_choice': "Video (MP4 - Kualitas Terbaik)",
-            'audio_format_choice': "Audio (MP3 - Kualitas Terbaik)",
+            'video_format_choice': _("Video (MP4 - Kualitas Terbaik)"),
+            'audio_format_choice': _("Audio (MP3 - Kualitas Terbaik)"),
             'search_results_count': 10,
             'show_completion_popup': True,
             'debug_mode': False, 
-            'search_result_double_click_action': "Unduh Video",
+            'search_result_double_click_action': _("Unduh Video"),
             'invert_playback_shortcuts': False,
-            'autohide_delay': '5 detik',
-            'theme': 'Light',
+            'autohide_delay': _('5 detik'),
+            'theme': _('Light'),
             'monitor_clipboard': True,
             'embed_metadata': True,
             'use_parallel_download': False,
+            'smart_autoplay_related': True,
+            'smart_autoplay_related_limit': 50,
             'playback_rate': 1.0,
+            'playback_volume_percent': 100,
             'audio_output_device_id': None,
             'ai_features': constants.AI_FEATURES_DEFAULT.copy(),
             'cookie_source': 'none',
             'cookie_browser': 'chrome',
-            'cookie_file': ''
+            'cookie_file': '',
+            'language': 'id',
         }
         self.settings = self.default_settings.copy()
         self.load_app_settings()
         if self.settings.get('use_parallel_download', False):
             aria2c_executable = "aria2c.exe" if sys.platform == "win32" else "aria2c"
             if not shutil.which(aria2c_executable):
-                QMessageBox.warning(self, "Peringatan", 
-                                    "File yang diperlukan untuk fitur akselerasi download nggak ada. Fitur akan dinonaktifkan")
+                QMessageBox.warning(self, _("Peringatan"), 
+                                    _("File yang diperlukan untuk fitur akselerasi download nggak ada. Fitur akan dinonaktifkan"))
                 self.settings['use_parallel_download'] = False
                 self.save_app_settings(show_error=False)
 
@@ -91,7 +99,7 @@ class MainWindowCore(QMainWindow):
         if NVDA_CONTROL_AVAILABLE:
             nvda_speak(text, interrupt=True)
         
-        if text != "Siap":
+        if text != _("Siap"):
             self._status_reset_timer.start(5000)
 
     def set_initial_window_geometry(self):
@@ -108,7 +116,7 @@ class MainWindowCore(QMainWindow):
         else:
             self.setGeometry(100, 100, window_width, window_height)
 
-    def stop_active_threads(self, exclude_stream_info=False, exclude_download_thread=False, exclude_playlist_fetch_thread=False, exclude_search_thread=False, exclude_channel_fetch_thread=False):
+    def stop_active_threads(self, exclude_stream_info=False, exclude_related_fetch_thread=False, exclude_download_thread=False, exclude_playlist_fetch_thread=False, exclude_search_thread=False, exclude_channel_fetch_thread=False):
         threads_to_stop = []
         if not exclude_download_thread and self.download_thread:
             threads_to_stop.append(self.download_thread)
@@ -116,6 +124,8 @@ class MainWindowCore(QMainWindow):
             threads_to_stop.append(self.search_thread)
         if not exclude_stream_info and self.stream_info_thread:
             threads_to_stop.append(self.stream_info_thread)
+        if not exclude_related_fetch_thread and self.related_fetch_thread:
+            threads_to_stop.append(self.related_fetch_thread)
         if not exclude_playlist_fetch_thread and self.playlist_fetch_thread:
             threads_to_stop.append(self.playlist_fetch_thread)
         if not exclude_channel_fetch_thread and self.channel_fetch_thread:
@@ -139,6 +149,9 @@ class MainWindowCore(QMainWindow):
             self.search_thread = None
         if not exclude_stream_info:
             self.stream_info_thread = None
+        if not exclude_related_fetch_thread:
+            self.related_fetch_thread = None
+            self.is_fetching_related = False
         if not exclude_playlist_fetch_thread:
             self.playlist_fetch_thread = None
         if not exclude_channel_fetch_thread:
@@ -153,10 +166,10 @@ class MainWindowCore(QMainWindow):
             self.update_progress_dialog = None
         if (not exclude_search_thread or not exclude_playlist_fetch_thread or not exclude_stream_info or not exclude_channel_fetch_thread) and self.operation_progress_dialog:
             title = self.operation_progress_dialog.windowTitle()
-            should_close_op_dialog = (not exclude_search_thread and title.startswith("Mencari")) or \
-                                     (not exclude_playlist_fetch_thread and (title.startswith("Memuat Playlist") or title.startswith("Memuat Isi Playlist"))) or \
-                                     (not exclude_channel_fetch_thread and title.startswith("Memuat Channel")) or \
-                                     (not exclude_stream_info and title.startswith("Memuat"))
+            should_close_op_dialog = (not exclude_search_thread and title.startswith(_("Mencari"))) or \
+                                     (not exclude_playlist_fetch_thread and (title.startswith(_("Memuat Playlist")) or title.startswith(_("Memuat Isi Playlist")))) or \
+                                     (not exclude_channel_fetch_thread and title.startswith(_("Memuat Channel"))) or \
+                                     (not exclude_stream_info and title.startswith(_("Memuat")))
             if should_close_op_dialog:
                 self.operation_progress_dialog.reject()
                 self.operation_progress_dialog = None
@@ -167,7 +180,10 @@ class MainWindowCore(QMainWindow):
             try:
                 os.makedirs(config_dir, exist_ok=True)
             except OSError as e:
-                QMessageBox.warning(self, "Pengaturan Error", f"Gagal membuat direktori konfigurasi: {config_dir}\nError: {e}\nPengaturan tidak akan dimuat/disimpan.")
+                _m1 = _("Gagal membuat direktori konfigurasi:")
+                _m2 = _("Error:")
+                _m3 = _("Pengaturan tidak akan dimuat/disimpan.")
+                QMessageBox.warning(self, _("Pengaturan Error"), f"{_m1}: {config_dir}\n{_m2}: {e}\n{_m3}")
                 self.settings = self.default_settings.copy()
                 set_debug_mode(self.settings.get('debug_mode', False))
                 return
@@ -185,7 +201,9 @@ class MainWindowCore(QMainWindow):
             
             set_debug_mode(self.settings.get('debug_mode', False))
         except (json.JSONDecodeError, IOError) as e:
-            QMessageBox.warning(self, "Pengaturan Error", f"Gagal muat pengaturan dari {constants.CONFIG_FILE}: {e}. Pakai default.")
+            _m1 = _("Gagal muat pengaturan dari")
+            _m2 = _("Pakai default.")
+            QMessageBox.warning(self, _("Pengaturan Error"), f"{_m1} {constants.CONFIG_FILE}: {e}. {_m2}")
             self.settings = self.default_settings.copy()
             set_debug_mode(self.settings.get('debug_mode', False))
             self.save_app_settings(show_error=False)
@@ -200,14 +218,17 @@ class MainWindowCore(QMainWindow):
                 os.makedirs(config_dir, exist_ok=True)
             except OSError as e:
                 if show_error:
-                    QMessageBox.warning(self, "Gagal Simpan Pengaturan", f"Gagal membuat direktori konfigurasi: {config_dir}\nError: {e}")
+                    _m1 = _("Gagal membuat direktori konfigurasi:")
+                    _m2 = _("Error:")
+                    QMessageBox.warning(self, _("Gagal Simpan Pengaturan"), f"{_m1}: {config_dir}\n{_m2}: {e}")
                 return
         try:
             with open(constants.CONFIG_FILE, 'w') as f:
                 json.dump(self.settings, f, indent=4)
         except IOError as e:
             if show_error:
-                QMessageBox.warning(self, "Gagal Simpan Pengaturan", f"Gagal simpan ke {constants.CONFIG_FILE}: {e}")
+                _m1 = _("Gagal simpan ke")
+                QMessageBox.warning(self, _("Gagal Simpan Pengaturan"), f"{_m1} {constants.CONFIG_FILE}: {e}")
 
     def set_ui_busy_state(self, busy, operation_type="general"):
         is_dialog_blocking = (self.operation_progress_dialog and self.operation_progress_dialog.isVisible()) or \
@@ -251,10 +272,14 @@ class MainWindowCore(QMainWindow):
 
     def update_window_title_status(self, status_text=""):
         parts = [self.BASE_TITLE]
-        if status_text and status_text != "Siap":
+        if status_text and status_text != _("Siap"):
             parts.insert(0, status_text)
         vid_name = self.current_video_title_for_window
-        if vid_name and any(s in status_text.lower() for s in ["mencari", "hasil", "gagal", "memuat", "isi", "mengunduh", "batch", "memutar", "dijeda"]):
+        keywords = [
+            _("mencari"), _("hasil"), _("gagal"), _("memuat"), _("isi"),
+            _("mengunduh"), _("batch"), _("memutar"), _("dijeda")
+        ]
+        if vid_name and any(s.lower() in status_text.lower() for s in keywords):
             parts.insert(1, f"({vid_name[:30] + '...' if len(vid_name) > 30 else vid_name})")
         self.setWindowTitle(" - ".join(parts))
 
@@ -262,7 +287,8 @@ class MainWindowCore(QMainWindow):
         try:
             norm_path = os.path.normpath(path)
             if not os.path.exists(norm_path):
-                QMessageBox.warning(self, "Lokasi Tidak Ditemukan", f"Path tidak valid: {norm_path}")
+                _m1 = _("Path tidak valid:")
+                QMessageBox.warning(self, _("Lokasi Tidak Ditemukan"), f"{_m1}: {norm_path}")
                 return
             if not QDesktopServices.openUrl(QUrl.fromLocalFile(norm_path)):
                 if sys.platform == 'win32':
@@ -272,4 +298,6 @@ class MainWindowCore(QMainWindow):
                 else:
                     os.system(f'xdg-open "{norm_path}"')
         except Exception as e:
-            QMessageBox.warning(self, "Gagal Buka Lokasi", f"Tidak dapat membuka: {norm_path}\nError: {str(e)}")
+            _m1 = _("Tidak dapat membuka:")
+            _m2 = _("Error:")
+            QMessageBox.warning(self, _("Gagal Buka Lokasi"), f"{_m1}: {norm_path}\n{_m2}: {str(e)}")

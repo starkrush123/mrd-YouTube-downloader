@@ -39,18 +39,18 @@ class MainWindowValidation:
 
     def handle_direct_video_url_dialog(self, video_url):
         dialog = QDialog(self.main_window)
-        dialog.setWindowTitle("URL Video Terdeteksi")
+        dialog.setWindowTitle(_("URL Video Terdeteksi"))
         layout = QVBoxLayout(dialog)
         
-        label = QLabel(f"URL video terdeteksi:\n{video_url[:70]}{'...' if len(video_url) > 70 else ''}\n\nApa yang ingin Anda lakukan?")
+        label = QLabel(f"{_('URL video terdeteksi')}:\n{video_url[:70]}{'...' if len(video_url) > 70 else ''}\n\n{_('Apa yang ingin Anda lakukan?')}")
         label.setWordWrap(True)
         layout.addWidget(label)
         
         button_layout = QGridLayout()
-        btn_dl_vid = QPushButton("Unduh Video")
-        btn_dl_aud = QPushButton("Unduh Audio")
-        btn_play_vid = QPushButton("Putar Video")
-        btn_play_aud = QPushButton("Putar Audio")
+        btn_dl_vid = QPushButton(_("Unduh Video"))
+        btn_dl_aud = QPushButton(_("Unduh Audio"))
+        btn_play_vid = QPushButton(_("Putar Video"))
+        btn_play_aud = QPushButton(_("Putar Audio"))
         
         button_layout.addWidget(btn_dl_vid, 0, 0)
         button_layout.addWidget(btn_dl_aud, 0, 1)
@@ -77,7 +77,7 @@ class MainWindowValidation:
         btn_play_aud.clicked.connect(lambda: on_action_chosen(btn_play_aud))
         if dialog.exec() == QDialog.DialogCode.Accepted and chosen_action_key[0]:
             action = chosen_action_key[0]
-            title_hint = "Video dari URL"
+            title_hint = _("Video dari URL")
             if action == 'download_video':
                 self.main_window.download_handler.start_download(video_url, title_hint, 'video')
             elif action == 'download_audio':

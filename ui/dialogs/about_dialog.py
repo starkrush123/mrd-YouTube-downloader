@@ -7,7 +7,7 @@ from utils.constants import CURRENT_APP_VERSION
 class AboutDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Tentang mrd YouTube Downloader")
+        self.setWindowTitle(_("Tentang mrd YouTube Downloader"))
         self.setModal(True)
 
         layout = QVBoxLayout(self)
@@ -20,37 +20,37 @@ class AboutDialog(QDialog):
             pass
 
         # Judul Aplikasi
-        title_label = QLabel("<b>mrd YouTube Downloader</b>")
+        title_label = QLabel(_("<b>mrd YouTube Downloader</b>"))
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
         layout.addWidget(title_label)
 
         # Informasi Aplikasi
-        app_version_label = QLabel(f"Versi Aplikasi: {CURRENT_APP_VERSION}")
+        app_version_label = QLabel(f"{_('Versi Aplikasi')}: {CURRENT_APP_VERSION}")
         app_version_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
         layout.addWidget(app_version_label)
 
-        description_label = QLabel("Aplikasi untuk mengunduh video dan audio dari YouTube dengan mudah.")
+        description_label = QLabel(_("Aplikasi untuk mengunduh video dan audio dari YouTube dengan mudah."))
         description_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
         layout.addWidget(description_label)
 
-        creator_label = QLabel("Dibuat oleh: ridho")
+        creator_label = QLabel(_("Dibuat oleh: ridho"))
         creator_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
         layout.addWidget(creator_label)
 
-        gui_framework_label = QLabel("GUI Framework: PySide6")
+        gui_framework_label = QLabel(_("GUI Framework: PySide6"))
         gui_framework_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
         layout.addWidget(gui_framework_label)
 
-        qt_version_label = QLabel(f"Versi Qt: {qVersion()}")
+        qt_version_label = QLabel(f"{_('Versi Qt')}: {qVersion()}")
         qt_version_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
         layout.addWidget(qt_version_label)
 
-        python_version_label = QLabel(f"Versi Python: {python_version}")
+        python_version_label = QLabel(f"{_('Versi Python')}: {python_version}")
         python_version_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
         layout.addWidget(python_version_label)
 
-        yt_dlp_version_label = QLabel(f"Versi yt-dlp: {yt_dlp_version}")
+        yt_dlp_version_label = QLabel(f"{_('Versi yt-dlp')}: {yt_dlp_version}")
         yt_dlp_version_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
         layout.addWidget(yt_dlp_version_label)
 
@@ -62,7 +62,7 @@ class AboutDialog(QDialog):
         layout.addWidget(line)
 
         # Informasi Tambahan
-        built_with_label = QLabel("Dibangun menggunakan pustaka yt-dlp untuk fungsionalitas unduhan inti.")
+        built_with_label = QLabel(_("Dibangun menggunakan pustaka yt-dlp untuk fungsionalitas unduhan inti."))
         built_with_label.setFocusPolicy(Qt.FocusPolicy.TabFocus)
         layout.addWidget(built_with_label)
 
