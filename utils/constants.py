@@ -9,7 +9,7 @@ if not os.path.exists(APP_DATA_DIR):
 CONFIG_FILE = os.path.join(APP_DATA_DIR, "downloader_settings.json")
 LOG_FILE_PATH = os.path.join(APP_DATA_DIR, "app_debug.log")
 
-CURRENT_APP_VERSION = "1.6.0"
+CURRENT_APP_VERSION = "1.7.0"
 VERSION_INFO_URL = "https://gist.githubusercontent.com/starkrush123/241a35eab14fa99ea45603191f6c0471/raw/mrd_downloader_version.json"
 
 _GLOBAL_DEBUG_MODE = False

@@ -2,9 +2,47 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "mrd YouTube downloader"
-#define MyAppVersion "1.6.0"
 #define MyAppPublisher "mrido1"
 #define MyAppExeName "MRD-YouTube-Downloader.exe"
+#define ScriptDir AddBackslash(SourcePath)
+#define BuildDir AddBackslash(SourcePath) + "build\\main.dist\\"
+#define OutputInstallerDir AddBackslash(SourcePath) + "build\\installer\\"
+#define ConstantsPyFile AddBackslash(SourcePath) + "utils\\constants.py"
+
+; Auto-read app version from utils/constants.py (CURRENT_APP_VERSION = "x.y.z")
+#define MyAppVersion "0.0.0"
+#define _ConstHandle 0
+#define _Line ""
+#define _Token "CURRENT_APP_VERSION = \""
+
+#ifnexist ConstantsPyFile
+  #error "Version source file not found: " + ConstantsPyFile
+#endif
+
+#sub _TryExtractVersion
+  #define _Line FileRead(_ConstHandle)
+  #define _TokenPos Pos(_Token, _Line)
+  #if _TokenPos
+    #define _Tail Copy(_Line, _TokenPos + 23, 255)
+    #define _EndQuote Pos("\"", _Tail)
+    #if _EndQuote
+      #define MyAppVersion Copy(_Tail, 1, _EndQuote - 1)
+    #endif
+  #endif
+#endsub
+
+#for {_ConstHandle = FileOpen(ConstantsPyFile); _ConstHandle && !FileEof(_ConstHandle); ""} _TryExtractVersion
+#if _ConstHandle
+  #expr FileClose(_ConstHandle)
+#endif
+
+#if MyAppVersion == "0.0.0"
+  #error "Could not parse CURRENT_APP_VERSION from: " + ConstantsPyFile
+#endif
+
+#ifnexist BuildDir + MyAppExeName
+  #error "Build artifact not found. Expected: " + BuildDir + MyAppExeName
+#endif
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -27,8 +65,8 @@ ArchitecturesInstallIn64BitMode=x64compatible
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 ;PrivilegesRequired=lowest
-OutputDir=D:\
-OutputBaseFilename=mrd-YouTube-downloader1.6.0
+OutputDir={#OutputInstallerDir}
+OutputBaseFilename=mrd-YouTube-downloader{#MyAppVersion}
 SolidCompression=yes
 WizardStyle=modern
 
@@ -40,8 +78,8 @@ Name: "indonesian"; MessagesFile: "compiler:indonesian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\ridho\mrd-YouTube-downloader\build\main.dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\ridho\mrd-YouTube-downloader\build\main.dist\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#BuildDir}{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BuildDir}*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
