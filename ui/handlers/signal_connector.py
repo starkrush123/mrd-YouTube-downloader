@@ -30,6 +30,7 @@ class SignalConnector:
         self.main_window.media_player.playbackStateChanged.connect(self.player_handler.handle_media_player_state_changed)
         self.main_window.media_player.mediaStatusChanged.connect(self.player_handler.handle_media_player_status_changed)
         self.main_window.media_player.positionChanged.connect(self.player_handler.handle_media_player_position_changed)
+        self.main_window.media_player.seekableChanged.connect(self.player_handler.handle_media_player_seekable_changed)
 
         # Shortcuts
         self.main_window.play_video_shortcut.activated.connect(self.player_handler.play_video_from_input_shortcut)
