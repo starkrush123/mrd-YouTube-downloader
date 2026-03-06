@@ -21,6 +21,8 @@ class PlayerHandler:
         self._max_stream_recovery_attempts = 3
         self._recovery_in_progress = False
         self._recovery_expected_progress_from = 0
+        self._pending_recovery_seek_pos = None
+        self._recovery_seek_applied = False
         self._watchdog_last_position = 0
         self._watchdog_stall_ticks = 0
         self._watchdog_timer = QTimer(self.main_window)
@@ -192,7 +194,8 @@ class PlayerHandler:
         self._recovery_in_progress = True
         current_pos = max(0, int(self.main_window.media_player.position()))
         self._recovery_expected_progress_from = current_pos
-        resume_pos = max(0, current_pos - 2000)
+        self._pending_recovery_seek_pos = current_pos
+        self._recovery_seek_applied = False
         dprint(
             f"[Recovery] Attempt {self._stream_recovery_attempts}/{self._max_stream_recovery_attempts}, "
             f"reason={reason}, pos={current_pos}"
@@ -207,26 +210,42 @@ class PlayerHandler:
         self.main_window.media_player.setSource(QUrl(self._current_stream_url))
         self.main_window.media_player.play()
 
-        def _resume_after_reopen():
-            if self.main_window.media_player.playbackState() != QMediaPlayer.PlaybackState.StoppedState:
-                if resume_pos > 0:
-                    self.main_window.media_player.setPosition(resume_pos)
-            self._recovery_in_progress = False
-
-        QTimer.singleShot(1200, _resume_after_reopen)
+        QTimer.singleShot(1200, self._apply_pending_recovery_seek)
         QTimer.singleShot(3200, lambda a=self._stream_recovery_attempts: self._post_recovery_check(a))
         return True
+
+    def _apply_pending_recovery_seek(self):
+        if not self._recovery_in_progress:
+            return
+        if self._recovery_seek_applied:
+            return
+        if self._pending_recovery_seek_pos is None:
+            return
+        if not self.main_window.media_player.isSeekable():
+            return
+        target_pos = max(0, int(self._pending_recovery_seek_pos))
+        current_pos = max(0, int(self.main_window.media_player.position()))
+        if abs(current_pos - target_pos) > 350:
+            self.main_window.media_player.setPosition(target_pos)
+        self._recovery_seek_applied = True
 
     def _post_recovery_check(self, expected_attempt):
         if expected_attempt != self._stream_recovery_attempts:
             return
+        if not self._recovery_in_progress:
+            return
         state = self.main_window.media_player.playbackState()
         current_pos = max(0, int(self.main_window.media_player.position()))
-        progressed = current_pos >= (self._recovery_expected_progress_from + 500)
+        target_floor = max(0, int(self._recovery_expected_progress_from) - 400)
+        progressed = current_pos >= target_floor
         if state in (
             QMediaPlayer.PlaybackState.PlayingState,
             QMediaPlayer.PlaybackState.PausedState,
         ) and progressed:
+            self._recovery_in_progress = False
+            self._pending_recovery_seek_pos = None
+            self._recovery_seek_applied = False
+            self._stream_recovery_attempts = 0
             return
         self._recovery_in_progress = False
         if self._stream_recovery_attempts < self._max_stream_recovery_attempts:
@@ -381,8 +400,24 @@ class PlayerHandler:
             QMediaPlayer.MediaStatus.BufferingMedia,
             QMediaPlayer.MediaStatus.LoadedMedia,
         ):
-            # Playback sehat lagi, reset counter supaya recovery tetap tersedia jika drop berikutnya.
-            self._stream_recovery_attempts = 0
+            if self._recovery_in_progress:
+                self._apply_pending_recovery_seek()
+            elif status == QMediaPlayer.MediaStatus.BufferedMedia:
+                # Playback stabil lagi, reset counter supaya recovery tetap tersedia untuk drop berikutnya.
+                self._stream_recovery_attempts = 0
+
+    def handle_media_player_position_changed(self, position: int):
+        position = max(0, int(position))
+        if not self._recovery_in_progress:
+            return
+        target_floor = max(0, int(self._recovery_expected_progress_from) - 400)
+        if position < target_floor:
+            return
+        self._recovery_in_progress = False
+        self._pending_recovery_seek_pos = None
+        self._recovery_seek_applied = False
+        self._stream_recovery_attempts = 0
+        dprint(f"[Recovery] Stream recovered at position={position}.")
 
     def handle_media_player_state_changed(self, state: QMediaPlayer.PlaybackState):
         if self.main_window.operation_progress_dialog and self.main_window.operation_progress_dialog.isVisible() and state in [QMediaPlayer.PlaybackState.PlayingState, QMediaPlayer.PlaybackState.PausedState]:
@@ -483,6 +518,8 @@ class PlayerHandler:
         self._current_play_mode_video = bool(play_video)
         self._stream_recovery_attempts = 0
         self._recovery_in_progress = False
+        self._pending_recovery_seek_pos = None
+        self._recovery_seek_applied = False
         self._ensure_playback_seed(page_url, title_hint)
         if trigger_related:
             self._start_related_fetch(page_url, title_hint)
@@ -516,6 +553,8 @@ class PlayerHandler:
         self._current_play_mode_video = bool(play_video)
         self._stream_recovery_attempts = 0
         self._recovery_in_progress = False
+        self._pending_recovery_seek_pos = None
+        self._recovery_seek_applied = False
         if play_video:
             need_new_video_widget = (
                 self.main_window.video_widget is None
@@ -596,6 +635,8 @@ class PlayerHandler:
         self._current_stream_url = ""
         self._recovery_in_progress = False
         self._stream_recovery_attempts = 0
+        self._pending_recovery_seek_pos = None
+        self._recovery_seek_applied = False
         if self._watchdog_timer.isActive():
             self._watchdog_timer.stop()
         self.main_window.media_player.setVideoOutput(None)
