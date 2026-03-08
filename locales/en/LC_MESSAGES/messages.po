@@ -1288,3 +1288,27 @@ msgstr "Stream connection interrupted. Reconnecting ({attempt}/{total})..."
 
 msgid "Stream gagal dipulihkan. Melanjutkan ke item berikutnya..."
 msgstr "Stream recovery failed. Continuing to the next item..."
+
+msgid "Seimbang (Disarankan)"
+msgstr "Balanced (Recommended)"
+
+msgid "Kualitas Tinggi YouTube"
+msgstr "High Quality YouTube"
+
+msgid "Stabil untuk Jaringan Lambat"
+msgstr "Stable for Slow Networks"
+
+msgid "Hemat Bandwidth Maksimum"
+msgstr "Maximum Bandwidth Saving"
+
+msgid "Atur prioritas kualitas atau stabilitas stream playback sesuai kondisi jaringan Anda."
+msgstr "Adjust playback stream quality or stability priority based on your network conditions."
+
+msgid "Profil Stabilitas Stream:"
+msgstr "Stream Stability Profile:"
+
+msgid "Koneksi tidak stabil. Menurunkan kualitas stream untuk playback yang lebih lancar..."
+msgstr "Connection is unstable. Lowering stream quality for smoother playback..."
+
+msgid "Stream saat ini tidak stabil. Memuat ulang URL stream baru..."
+msgstr "The current stream is unstable. Loading a fresh stream URL..."

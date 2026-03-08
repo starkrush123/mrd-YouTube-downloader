@@ -1,4 +1,5 @@
 import shiboken6
+import time
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtCore import QUrl, QTimer
 from PySide6.QtMultimedia import QMediaPlayer, QMediaDevices
@@ -15,8 +16,12 @@ class PlayerHandler:
     def __init__(self, main_window):
         self.main_window = main_window
         self._suppress_autoplay_once = False
+        self._current_page_url = ""
+        self._current_title_hint = ""
         self._current_stream_url = ""
         self._current_play_mode_video = False
+        self._current_playback_profile = self._get_base_playback_profile()
+        self._recent_recovery_times = []
         self._stream_recovery_attempts = 0
         self._max_stream_recovery_attempts = 3
         self._recovery_in_progress = False
@@ -39,6 +44,66 @@ class PlayerHandler:
             'browser': self.main_window.settings.get('cookie_browser', 'chrome'),
             'file': self.main_window.settings.get('cookie_file', '')
         }
+
+    def _get_base_playback_profile(self):
+        profile = self.main_window.settings.get("playback_stream_profile", "balanced")
+        return profile if profile in ("hq", "balanced", "stable", "data_saver") else "balanced"
+
+    def _downgrade_playback_profile(self, profile):
+        if profile == "hq":
+            return "balanced"
+        if profile == "balanced":
+            return "stable"
+        if profile == "stable":
+            return "data_saver"
+        return None
+
+    def _try_lower_bandwidth_stream(self):
+        next_profile = self._downgrade_playback_profile(self._current_playback_profile)
+        if not next_profile or not self._current_page_url:
+            return False
+        self._current_playback_profile = next_profile
+        self.main_window.set_status_text(
+            _("Koneksi tidak stabil. Menurunkan kualitas stream untuk playback yang lebih lancar...")
+        )
+        self.request_stream_info_and_play(
+            self._current_page_url,
+            self._current_title_hint or self.main_window.current_video_title_for_window or _("Video"),
+            self._current_play_mode_video,
+            trigger_related=False,
+            playback_profile=next_profile,
+        )
+        return True
+
+    def _record_recovery_attempt(self):
+        now = time.monotonic()
+        self._recent_recovery_times = [t for t in self._recent_recovery_times if (now - t) <= 25.0]
+        self._recent_recovery_times.append(now)
+        return len(self._recent_recovery_times)
+
+    def _should_force_stream_refresh(self, reason):
+        if not self._current_page_url:
+            return False
+        rapid_recoveries = self._record_recovery_attempt() >= 3
+        hard_reason = str(reason).startswith("error:")
+        return hard_reason or rapid_recoveries or self._stream_recovery_attempts >= 2
+
+    def _refresh_stream_from_source(self, prefer_lower_profile=False):
+        if not self._current_page_url:
+            return False
+        if prefer_lower_profile and self._try_lower_bandwidth_stream():
+            return True
+        self.main_window.set_status_text(
+            _("Stream saat ini tidak stabil. Memuat ulang URL stream baru...")
+        )
+        self.request_stream_info_and_play(
+            self._current_page_url,
+            self._current_title_hint or self.main_window.current_video_title_for_window or _("Video"),
+            self._current_play_mode_video,
+            trigger_related=False,
+            playback_profile=self._current_playback_profile,
+        )
+        return True
 
     def _is_youtube_url(self, url):
         low = (url or "").lower()
@@ -219,6 +284,10 @@ class PlayerHandler:
             )
         )
 
+        if self._should_force_stream_refresh(reason):
+            self._recovery_in_progress = False
+            return self._refresh_stream_from_source(prefer_lower_profile=True)
+
         # Tahap 1: lakukan "seek jolt" (meniru manual seek mundur/maju) sebelum reconnect penuh.
         if reason != "post-check" and self.main_window.media_player.isSeekable() and current_pos > 0:
             back_pos = max(0, current_pos - 1500)
@@ -237,6 +306,7 @@ class PlayerHandler:
         self._pending_recovery_seek_retries = 0
         self._suppress_autoplay_once = True
         self.main_window.media_player.stop()
+        self.main_window.media_player.setSource(QUrl())
         self.main_window.media_player.setSource(QUrl(self._current_stream_url))
         self.main_window.media_player.play()
 
@@ -278,9 +348,12 @@ class PlayerHandler:
             self._recovery_in_progress = False
             self._pending_recovery_seek_pos = None
             self._recovery_seek_applied = False
+            self._recent_recovery_times.clear()
             self._stream_recovery_attempts = 0
             return
         self._recovery_in_progress = False
+        if self._try_lower_bandwidth_stream():
+            return
         if self._stream_recovery_attempts < self._max_stream_recovery_attempts:
             if self._attempt_stream_recovery(reason="post-check"):
                 return
@@ -461,6 +534,7 @@ class PlayerHandler:
         self._pending_recovery_seek_pos = None
         self._recovery_seek_applied = False
         self._pending_recovery_seek_retries = 0
+        self._recent_recovery_times.clear()
         self._stream_recovery_attempts = 0
         dprint(f"[Recovery] Stream recovered at position={position}.")
 
@@ -559,12 +633,16 @@ class PlayerHandler:
         else:
             QMessageBox.warning(self.main_window, _("Aksi Tidak Sesuai"), _("URL video YouTube yang valid diperlukan."))
 
-    def request_stream_info_and_play(self, page_url, title_hint, play_video, trigger_related=True):
+    def request_stream_info_and_play(self, page_url, title_hint, play_video, trigger_related=True, playback_profile=None):
         self.stop_current_playback(suppress_autoplay=True)
         self.main_window.stop_active_threads(exclude_stream_info=True, exclude_download_thread=True)
         self.main_window.current_video_title_for_window = title_hint
+        self._current_page_url = page_url
+        self._current_title_hint = title_hint
         self._current_stream_url = ""
         self._current_play_mode_video = bool(play_video)
+        self._current_playback_profile = playback_profile or self._get_base_playback_profile()
+        self._recent_recovery_times.clear()
         self._stream_recovery_attempts = 0
         self._recovery_in_progress = False
         self._pending_recovery_seek_pos = None
@@ -585,7 +663,14 @@ class PlayerHandler:
             self.main_window.stream_info_thread.wait()
             
         cookie_params = self._get_cookie_params()
-        self.main_window.stream_info_thread = StreamInfoThread(page_url, title_hint, play_video, cookie_params, self.main_window)
+        self.main_window.stream_info_thread = StreamInfoThread(
+            page_url,
+            title_hint,
+            play_video,
+            cookie_params,
+            playback_profile=self._current_playback_profile,
+            parent=self.main_window,
+        )
         self.main_window.stream_info_thread.stream_url_ready.connect(self.start_playback_with_stream_url)
         self.main_window.stream_info_thread.stream_error.connect(self.handle_stream_info_error)
         self.main_window.stream_info_thread.finished.connect(self.main_window._on_any_thread_finished)
@@ -606,6 +691,7 @@ class PlayerHandler:
         self._pending_recovery_seek_pos = None
         self._recovery_seek_applied = False
         self._pending_recovery_seek_retries = 0
+        self._recent_recovery_times.clear()
         if play_video:
             need_new_video_widget = (
                 self.main_window.video_widget is None
@@ -683,12 +769,16 @@ class PlayerHandler:
 
     def close_player_view(self):
         self.stop_current_playback(suppress_autoplay=True)
+        self._current_page_url = ""
+        self._current_title_hint = ""
         self._current_stream_url = ""
+        self._current_playback_profile = self._get_base_playback_profile()
         self._recovery_in_progress = False
         self._stream_recovery_attempts = 0
         self._pending_recovery_seek_pos = None
         self._recovery_seek_applied = False
         self._pending_recovery_seek_retries = 0
+        self._recent_recovery_times.clear()
         if self._watchdog_timer.isActive():
             self._watchdog_timer.stop()
         self.main_window.media_player.setVideoOutput(None)

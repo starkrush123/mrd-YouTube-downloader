@@ -361,3 +361,27 @@ msgstr "Koneksi stream terganggu. Mencoba menyambung ulang ({attempt}/{total})..
 
 msgid "Stream gagal dipulihkan. Melanjutkan ke item berikutnya..."
 msgstr "Stream gagal dipulihkan. Melanjutkan ke item berikutnya..."
+
+msgid "Seimbang (Disarankan)"
+msgstr "Seimbang (Disarankan)"
+
+msgid "Kualitas Tinggi YouTube"
+msgstr "Kualitas Tinggi YouTube"
+
+msgid "Stabil untuk Jaringan Lambat"
+msgstr "Stabil untuk Jaringan Lambat"
+
+msgid "Hemat Bandwidth Maksimum"
+msgstr "Hemat Bandwidth Maksimum"
+
+msgid "Atur prioritas kualitas atau stabilitas stream playback sesuai kondisi jaringan Anda."
+msgstr "Atur prioritas kualitas atau stabilitas stream playback sesuai kondisi jaringan Anda."
+
+msgid "Profil Stabilitas Stream:"
+msgstr "Profil Stabilitas Stream:"
+
+msgid "Koneksi tidak stabil. Menurunkan kualitas stream untuk playback yang lebih lancar..."
+msgstr "Koneksi tidak stabil. Menurunkan kualitas stream untuk playback yang lebih lancar..."
+
+msgid "Stream saat ini tidak stabil. Memuat ulang URL stream baru..."
+msgstr "Stream saat ini tidak stabil. Memuat ulang URL stream baru..."

@@ -75,6 +75,7 @@ class MainWindowCore(QMainWindow):
             'use_parallel_download': False,
             'smart_autoplay_related': True,
             'smart_autoplay_related_limit': 50,
+            'playback_stream_profile': 'balanced',
             'playback_rate': 1.0,
             'playback_volume_percent': 100,
             'audio_output_device_id': None,
